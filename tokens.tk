@@ -1,0 +1,12 @@
+@use 1;
+@start 1;
+@eval 2;
+@end 0;
+@include 1;
+@def 2;
+@alias 2;
+
+pack C;
+import 1;
+export C;
+
