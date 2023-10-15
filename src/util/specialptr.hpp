@@ -8,6 +8,7 @@
   class SmartPointer{
     Pointer* ptr;
 
+    public:
 
     explicit SmartPointer(Pointer* ptr = nullptr){this->ptr = ptr}
 
@@ -25,13 +26,8 @@
       this->ptr = ptr;
     }
 
-    void* operator new(size_t size){
-      this->ptr = ::operator new(size);
-      return ptr;
-    }
-
-    void operator delete(void* ptr){  
-      delete ptr;
+    Pointer* get(){
+      return this->ptr;
     }
   };
   }
