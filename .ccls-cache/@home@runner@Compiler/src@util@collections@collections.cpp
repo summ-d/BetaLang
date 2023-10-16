@@ -47,5 +47,15 @@ namespace util{
         }
       }
   }
+
+  template<typename _Iter>
+  Iterator<_Iter>::Iterator() noexcept{
+    current = nullptr;
+  }
+
+  template<typename _Iter>
+  Iterator<_Iter>::Iterator(kpr ref) noexcept{
+    current = ref;
+  }
   
 }

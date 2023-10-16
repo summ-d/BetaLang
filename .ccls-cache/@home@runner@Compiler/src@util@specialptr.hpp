@@ -1,7 +1,6 @@
 #ifndef specialptr_hpp
 #define specialptr_hpp
 
-  #include "util.hpp"
 
   namespace util{
   template<typename Pointer>
