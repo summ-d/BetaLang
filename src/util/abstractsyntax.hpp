@@ -134,25 +134,8 @@ namespace util{
     std::string tokenFileName;
   } TokenSettings;
   
-  template<typename Syntax = Token>
-  class AbstractSyntax: public TokenScraper{
-    std::vector<Token> tokens;
-
-    class AbstractNode{
-      public:
-      std::string token;
-      std::unique_ptr<AbstractNode> parent;
-      std::vector<std::unique_ptr<AbstractNode> children;
-      u8 type;
-    };
-
-    std::unique_ptr<AbstractNode> head_node;
+  //template<typename Syntax = Token>
   
-    public: 
-    AbstractSyntax(TokenSettings ts): TokenScraper(ts.tokenFileName){
-      this->tokens = ts.tokens;
-      head_node = new AbstractNode();
-    }
     
 
     
