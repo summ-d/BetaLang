@@ -1,10 +1,20 @@
 #ifndef collections_hpp
 #define collections_hpp
 
+#include "specialptr.hpp"
+
 namespace util {
 typedef unsigned long size_t;
 typedef unsigned char u8;
 
+  struct Helper{ static void NOT_IMPLEMENTED(); };
+  #define NOT_IMPLEMENTED() Helper::NOT_IMPLEMENTED();
+  
+
+#define DEFAULT_TEMPLATE_STRING template<typename _String, typename Alloc>
+#define DEFAULT_TEMPLATE_LIST template<typename _Link, typename Alloc>
+#define DEF_NODE template<typename _Link>
+  
 inline bool strcmp(const char *s1, const char *s2) {
   for (int i = 0; s1[i] != '\0'; i++) {
     if (s1[i] != s2[i] || s2[i] == '\0') {
@@ -81,7 +91,7 @@ template <typename _Iter> class Iterator {
   using kRef = const _Iter &;
 
   _Iter *current;
-  _Iter *prev;
+  _Iter *previous;
 
 public:
   Iterator() noexcept;
@@ -98,9 +108,11 @@ public:
   virtual Iterator<_Iter> begin() const noexcept = 0;
   virtual Iterator<_Iter> end() const noexcept = 0;
 
-  virtual Iterator<_Iter> operator+(const int& i) noexcept = 0;
-  virtual Iterator<_Iter> operator-(const int& i) noexcept = 0;
+  virtual Iterator<_Iter>& operator+(const int& i) noexcept = 0;
+  virtual Iterator<_Iter>& operator-(const int& i) noexcept = 0;
 
+  virtual Iterator<_Iter> next() = 0;
+  virtual Iterator<_Iter> prev() = 0;
   
 };
 
@@ -118,9 +130,10 @@ class String : public virtual Iterator<_String> {
 
   Alloc allocator;
   int count = 1;
+  size_t size = this->getSize();
 
-  inline size_t getNonTermSize(const char *str) {
-    const char *s;
+  inline size_t getNonTermSize(ptr_type str) {
+    kPtr_type s;
     for (s = str; *s; ++s)
       ;
     return (s - str);
@@ -174,8 +187,6 @@ public:
     return strcmp(s1.asCstr(), s2.asCstr());
   }
 
-  Iterator<_String> begin();
-
   void concat(String<_String> &s);
 
   String<_String> concat(String<_String> s);
@@ -184,9 +195,13 @@ public:
 
   ptr_type substr(int start, int end);
 
+  String<_String> substr(int indStart, size_t size);
+
   int *findAll(_String val);
+  int* findAll(ptr_type val);
 
   option::Option<int> findFirst(_String val);
+  option::Option<int> findFirst(ptr_type val);
 
   Iterator<_String> &operator++() override {
     iter_type::prev = iter_type::current;
@@ -215,12 +230,119 @@ public:
   Iterator<_String> end() const noexcept override{
     return this->str[this->getSize() + 1];
   }
+
+  Iterator<_String>& operator+(const int& i) noexcept override{
+    return str[iter_type::current + i];
+  }
+
+  Iterator<_String>& operator-(const int& i) noexcept override{
+    return str[iter_type::current - i];
+  }
+
+  type operator[](int pos);
+  String<type> operator=(kPtr_type& c);
+  void operator=(ptr_type& c);
+
+  bool isEmpty(){ return this->str[0] == '\0'; }
+
+  Iterator<_String> next() override;
+  Iterator<_String> prev() override;
+    
 };
 
 typedef String<char> Str;
 
-template <typename _Link, typename Alloc = Allocator<_Link>>
-class LinkedList {};
+template<typename _Link>
+struct Node{
+  SmartPointer<Node> prev;
+  _Link data;
+  SmartPointer<Node> next;
+  Node();
+  Node(_Link data, SmartPointer<Node<_Link>> prev, SmartPointer<Node> next);
+  Node(Node<_Link>& n);
+  Node(Node<_Link>&& n);
+};
+
+template <typename _Link, typename Alloc = Allocator<Node<_Link>>>
+class LinkedList: public virtual Iterator<Node<_Link>> {
+ 
+  using ptr_type = _Link*;
+  using kPtr = const _Link*;
+  using ref_type = _Link&;
+  using kRef = const _Link&;
+  using kpr = const _Link*&;
+  using node_type = Node<_Link>;
+  using iter_type = Iterator<node_type>;
+
+  SmartPointer<node_type> head;
+  SmartPointer<node_type> tail;
+
+  public:
+
+  LinkedList(_Link data): iter_type(head){
+    head = new Node<_Link>(data, nullptr, tail);
+    tail = new Node<_Link>();
+    tail->prev = head;
+    tail->next = nullptr;
+  }
+
+  #pragma 
+  LinkedList(LinkedList<_Link>& ll): iter_type(ll.getFront()){
+    int i = 0;
+    while(ll.getAt(i)->next != nullptr){
+      SmartPointer<node_type> _node = new Node<_Link>(ll.getAt(i));
+      i++;
+    }
+  }
+
+  LinkedList(LinkedList<_Link>&& ll): iter_type(ll.getFront()){
+    int i = 0;
+    while(ll.getAt(i)->next != nullptr){
+      SmartPointer<node_type> _node = new Node<_Link>(ll.getAt(i));
+      i++;
+    }
+  }
+
+
+  void push(_Link data);
+  void insertBefore(_Link data, int pos);
+  void insertAfter(_Link data, int pos);
+  void append(_Link data);
+
+  iter_type at(int pos);
+  iter_type at(_Link (*fun));
+  iter_type front();
+  iter_type back();
+
+  SmartPointer<node_type> getFront();
+  SmartPointer<node_type> getBack();
+  SmartPointer<node_type> getAt(int pos);
+
+  void deleteFirst();
+  void deleteLast();
+  void deletePos(int pos);
+
+  bool isEmpty();
+  
+
+
+  //inherited methods from `Iterator<_Iter>`
+  bool operator!=(const Iterator<node_type>& other) const noexcept override;
+  bool operator==(const Iterator<node_type>& other) const noexcept override;
+  
+  Iterator<node_type> &operator++() override;
+  Iterator<node_type> &operator++(int) override;
+
+  Iterator<node_type> begin() const noexcept override;
+  Iterator<node_type> end() const noexcept override;
+
+  Iterator<node_type> operator+(const int& i) noexcept override;
+  Iterator<node_type> operator-(const int& i) noexcept override;
+
+  Iterator<node_type> next() override;
+  Iterator<node_type> prev() override;
+  
+};
 
 } // namespace util
 

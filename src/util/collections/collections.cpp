@@ -57,5 +57,167 @@ namespace util{
   Iterator<_Iter>::Iterator(kpr ref) noexcept{
     current = ref;
   }
+
+  DEFAULT_TEMPLATE_STRING
+  void String<_String, Alloc>::concat(String<_String> &s){
+    ptr_type new_string = allocator.allocate(this->size + s.getSize());
+    for(int i = 0; i < sizeof(new_string); i++){
+      new_string[i] = str[i];
+      if(i == this->size){
+        new_string[i] = s.asCstr()[i - this->size];
+      }
+    }
+    str = new_string;
+  }
+
+  DEFAULT_TEMPLATE_STRING
+  String<_String> String<_String, Alloc>::concat(String<_String> s){
+    ptr_type new_str = allocator.allocate(this->size + s.getSize());
+    for(int i = 0; i < sizeof(new_str); i++){
+      new_str[i] = str[i];
+      if(i == this->size){
+        new_str[i] = s.asCstr()[i - this->size];
+      }
+    }
+    String<_String> new_string(new_str);
+    return new_string;
+  }
+
+  DEFAULT_TEMPLATE_STRING
+  typename String<_String, Alloc>::type String<_String, Alloc>::at(int pos){
+    if(pos < this->size){
+      return this->str[pos];
+    }
+    return '\0';
+  }
+
+  DEFAULT_TEMPLATE_STRING
+  typename String<_String, Alloc>::ptr_type String<_String, Alloc>::substr(int start, int end){
+    ptr_type new_str = allocator.allocate(end - start);
+    for(int i = start; i < end; i++){
+      new_str[i - start] = str[i];
+    }
+    return new_str;
+  }
+
+  DEFAULT_TEMPLATE_STRING
+  String<_String> String<_String, Alloc>::substr(int indStart, size_t size){
+    ptr_type new_str = allocator.allocate(size);
+    for(int i = indStart; i < indStart + size; i++){
+      new_str[i - indStart] = str[i];
+    }
+    String<_String> new_string = new_str;
+  }
+
+  DEFAULT_TEMPLATE_STRING
+  int* String<_String, Alloc>::findAll(_String val){
+    int* arr;
+    int arrCount = 0;
+    for(int i = 0; i < this->size; i++){
+      if(str[i] == val){
+        arr[arrCount] = i;
+        arrCount++;
+      }
+    }
+    if(arrCount == 0){
+      return nullptr;
+    }
+    return arr;
+  }
+
+  DEFAULT_TEMPLATE_STRING
+  int* String<_String, Alloc>::findAll(ptr_type val){
+    size_t size = this->getNonTermSize(val);
+    int* arr;
+    int arrCount = 0;
+    for(int i = 0; i < this->size - size; i++){
+      ptr_type sub = this->substr(i, i + size);
+      if(strcmp(sub, val)){
+        arr[arrCount] = i;
+        arrCount++;
+      }
+    } 
+    if(arrCount == 0){
+      return nullptr;
+    }
+    return arr;
+  }
+
+  DEFAULT_TEMPLATE_STRING
+  option::Option<int> String<_String, Alloc>::findFirst(_String val){
+    int index;
+    option::Option<int> ind(index);
+    for(int i = 0; i < this->size; i++){
+      if(str[i] == val){
+        index = i;
+        ind.set(true);
+        break;
+      }
+    }
+    return ind;
+  }
+
+  DEFAULT_TEMPLATE_STRING
+  option::Option<int> String<_String, Alloc>::findFirst(ptr_type val){
+    int index = 0;
+    option::Option<int> ind(index);
+    for(int i = 0; i < this->size; i++){
+      if(str[i] == val){
+        index = i;
+        ind.set(true);
+        break;
+      }
+    }
+    return ind;
+  }
+
+  DEFAULT_TEMPLATE_STRING
+  typename String<_String, Alloc>::type String<_String, Alloc>::operator[](int pos){
+    return this->at(pos);
+  }
+
+  DEFAULT_TEMPLATE_STRING
+  String<_String> String<_String, Alloc>::operator=(kPtr_type& c){
+    return new String<_String>(c);
+  }
+
+  DEFAULT_TEMPLATE_STRING 
+  void String<_String, Alloc>::operator=(ptr_type& c){
+    if(strcmp(c, str)){
+      return;
+    } else{
+      str = c;
+    }
+  }
+  
+  DEF_NODE
+  Node<_Link>::Node(){
+    prev = nullptr;
+    next = nullptr;
+  }
+
+  DEF_NODE
+  Node<_Link>::Node(_Link data, SmartPointer<Node<_Link>> prev, SmartPointer<Node<_Link>> next){
+    this->data = data;
+    this->next = next;
+    this->prev = prev;
+  } 
+
+  DEF_NODE 
+  Node<_Link>::Node(Node<_Link>& n){
+    this->data = n.data;
+    this->next = n.next;
+    this->prev = n.prev;
+  }
+
+  DEF_NODE
+  Node<_Link>::Node(Node<_Link>&& n){
+    this->data = n.data;
+    this->next = n.next;
+    this->prev = n.prev;
+  }
+
+  
+
   
 }
