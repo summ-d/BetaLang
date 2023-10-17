@@ -7,8 +7,8 @@ namespace util {
 typedef unsigned long size_t;
 typedef unsigned char u8;
 
-  struct Helper{ static void NOT_IMPLEMENTED(); };
-  #define NOT_IMPLEMENTED() Helper::NOT_IMPLEMENTED();
+  //struct Helper{ static void NOT_IMPLEMENTED(); };
+  //#define NOT_IMPLEMENTED() Helper::NOT_IMPLEMENTED();
   
 
 #define DEFAULT_TEMPLATE_STRING template<typename _String, typename Alloc>
@@ -247,7 +247,10 @@ public:
 
   Iterator<_String> next() override;
   Iterator<_String> prev() override;
-    
+
+  String<_String>& operator+(kPtr_type& str) noexcept;
+  void operator+=(kPtr_type& str) noexcept;
+
 };
 
 typedef String<char> Str;
@@ -286,7 +289,7 @@ class LinkedList: public virtual Iterator<Node<_Link>> {
     tail->next = nullptr;
   }
 
-  #pragma 
+  
   LinkedList(LinkedList<_Link>& ll): iter_type(ll.getFront()){
     int i = 0;
     while(ll.getAt(i)->next != nullptr){
@@ -310,7 +313,7 @@ class LinkedList: public virtual Iterator<Node<_Link>> {
   void append(_Link data);
 
   iter_type at(int pos);
-  iter_type at(_Link (*fun));
+  iter_type at(iter_type (*fun));
   iter_type front();
   iter_type back();
 
@@ -324,7 +327,7 @@ class LinkedList: public virtual Iterator<Node<_Link>> {
 
   bool isEmpty();
   
-
+  _Link operator[](const int& i);
 
   //inherited methods from `Iterator<_Iter>`
   bool operator!=(const Iterator<node_type>& other) const noexcept override;
@@ -341,8 +344,12 @@ class LinkedList: public virtual Iterator<Node<_Link>> {
 
   Iterator<node_type> next() override;
   Iterator<node_type> prev() override;
+
   
+
 };
+
+
 
 } // namespace util
 

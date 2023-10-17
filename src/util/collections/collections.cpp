@@ -189,6 +189,44 @@ namespace util{
       str = c;
     }
   }
+
+  DEFAULT_TEMPLATE_STRING
+  Iterator<_String> String<_String, Alloc>::next(){
+    return str[iter_type::current + 1];
+  }
+
+  DEFAULT_TEMPLATE_STRING
+  Iterator<_String> String<_String, Alloc>::prev(){
+    return str[iter_type::current - 1];
+  }
+
+  DEFAULT_TEMPLATE_STRING
+  String<_String> &String<_String, Alloc>::operator+(kPtr_type& str) noexcept{
+    size_t size = this->getNonTermSize(str);
+    ptr_type new_str = allocator.allocate((this->size + size) / sizeof(_String));
+    for(int i = 0; i < (this->size + size); i++){
+      new_str[i] = this->str[i];
+      if(i == this->size){
+        new_str[i] = str[i - this->size];
+      }
+    }
+    String<_String> new_string = new_str;
+    return new_string;
+  }
+
+  DEFAULT_TEMPLATE_STRING
+  void String<_String, Alloc>::operator+=(kPtr_type& str) noexcept{
+      size_t size = this->getNonTermSize(str);
+      ptr_type new_str = allocator.allocate((this->size + size) / sizeof(_String));
+      for(int i = 0; i < (this->size + size); i++){
+        new_str[i] = this->str[i];
+        if(i == this->size){
+          new_str[i] = str[i - this->size];
+        }
+      }
+      str = new_str;
+  }
+
   
   DEF_NODE
   Node<_Link>::Node(){
@@ -217,7 +255,129 @@ namespace util{
     this->prev = n.prev;
   }
 
-  
+  DEFAULT_TEMPLATE_LIST
+  void LinkedList<_Link, Alloc>::push(_Link data){
+    
+  }
 
+  DEFAULT_TEMPLATE_LIST
+  void LinkedList<_Link, Alloc>::insertAfter(_Link data, int pos){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  void LinkedList<_Link, Alloc>::insertBefore(_Link data, int pos){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  void LinkedList<_Link, Alloc>::append(_Link data){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  typename LinkedList<_Link, Alloc>::iter_type LinkedList<_Link, Alloc>::at(int pos){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  typename LinkedList<_Link, Alloc>::iter_type LinkedList<_Link, Alloc>::at(iter_type (*fun)){
+    return fun;
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  typename LinkedList<_Link, Alloc>::iter_type LinkedList<_Link, Alloc>::front(){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  typename LinkedList<_Link, Alloc>::iter_type LinkedList<_Link, Alloc>::back(){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  SmartPointer<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::getFront(){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  SmartPointer<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::getBack(){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  SmartPointer<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::getAt(int pos){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  void LinkedList<_Link, Alloc>::deleteFirst(){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  void LinkedList<_Link, Alloc>::deleteLast(){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  void LinkedList<_Link, Alloc>::deletePos(int pos){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  bool LinkedList<_Link, Alloc>::isEmpty(){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  _Link LinkedList<_Link, Alloc>::operator[](const int& i){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  bool LinkedList<_Link, Alloc>::operator!=(const Iterator<node_type>& other) const noexcept{
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  bool LinkedList<_Link, Alloc>::operator==(const Iterator<node_type>& other) const noexcept{
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  Iterator<typename LinkedList<_Link, Alloc>::node_type> &LinkedList<_Link, Alloc>::operator++(){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  Iterator<typename LinkedList<_Link, Alloc>::node_type> &LinkedList<_Link, Alloc>::operator++(int){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  Iterator<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::begin() const noexcept{
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  Iterator<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::operator+(const int& i) noexcept{
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  Iterator<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::operator-(const int& i) noexcept{
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  Iterator<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::next(){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  Iterator<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::prev(){
+    
+  }
   
 }
