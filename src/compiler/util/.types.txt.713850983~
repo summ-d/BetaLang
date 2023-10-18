@@ -1,0 +1,66 @@
+@use <arch>;
+@start <start-point>;
+@eval (<expression>): children
+@end;
+@include <file-name>;
+@def <NAME> <value>;
+@alias <type> <name>;
+
+pack <pack-name>{ children ;
+import <pack-name>;
+export{ children };
+export <var-obj-comp-fun>;
+
+Integer <null-flag> <name> <opt-val>;
+Int8 <null-flag> <name> <opt-val>;
+Int16 <null-flag> <name> <opt-val>;
+Int32 <null-flag> <name> <opt-val>;
+Int64 <null-flag> <name> <opt-val>
+Uint8 <null-flag> <name> <opt-val>;
+Uint16 <null-flag> <name> <opt-val>;
+Uint32 <null-flag> <name> => <opt-val>
+Uint64 <null-flag> <name> => <opt-val>;
+Float <null-flag> <name> => <opt-val>;
+Float8 <null-flag> <name> => <opt-val>;
+Float16 <null-flag> <name> => <opt-val>;
+Float32 <null-flag> <name> => <opt-val>;
+Float64 <null-flag> <name> => <opt-val>;
+
+Char <null-flag> <name> => <opt-val>;
+Char16 <null-flag> <name> => <opt-val>;
+String <null-flag> <name> => <opt-val>;
+
+Obj <name>: <inheritance>{ children };
+Comp <name> { <only-types>children };
+
+external <fileName> {<children>};
+external <fileName> <type> <name>;
+
+defun <name>(<args>) => <return-type>{
+  <children>
+};
+
+generic<<name>>
+
+global <child>;
+override <function>;
+abstract <obj>;
+
+pub <val>;
+priv <val>;
+prop <val>;
+
+con(<args>) => <return-type>{<children>};
+decon() => <return-type>{<children>};
+
+<c1> ==> <c2>
+<c1> !=> <c2>
+<c1> <=> <c2>
+<c1> >=> <c2>
+<c1> < <c2>
+<c1> > <c2>
+!<c1>
+<int-type> << <int-type>
+<int-type >> <int-type>
+<name> => <val>
+

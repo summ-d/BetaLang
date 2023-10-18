@@ -2,6 +2,8 @@
 #define collections_hpp
 
 #include "specialptr.hpp"
+#include <fstream>
+#include <string>
 
 namespace util {
 typedef unsigned long size_t;
@@ -251,6 +253,8 @@ public:
   String<_String>& operator+(kPtr_type& str) noexcept;
   void operator+=(kPtr_type& str) noexcept;
 
+  std::string asStdStr();
+
 };
 
 typedef String<char> Str;
@@ -329,6 +333,9 @@ class LinkedList: public virtual Iterator<Node<_Link>> {
   
   _Link operator[](const int& i);
 
+  LinkedList<_Link> operator=(const LinkedList<_Link>& ll) noexcept;
+  void operator+=(const LinkedList<_Link>& ll) noexcept;
+
   //inherited methods from `Iterator<_Iter>`
   bool operator!=(const Iterator<node_type>& other) const noexcept override;
   bool operator==(const Iterator<node_type>& other) const noexcept override;
@@ -339,8 +346,8 @@ class LinkedList: public virtual Iterator<Node<_Link>> {
   Iterator<node_type> begin() const noexcept override;
   Iterator<node_type> end() const noexcept override;
 
-  Iterator<node_type> operator+(const int& i) noexcept override;
-  Iterator<node_type> operator-(const int& i) noexcept override;
+  Iterator<node_type>& operator+(const int& i) noexcept override;
+  Iterator<node_type>& operator-(const int& i) noexcept override;
 
   Iterator<node_type> next() override;
   Iterator<node_type> prev() override;
