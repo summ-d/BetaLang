@@ -1,143 +1,109 @@
 #ifndef abstractsyntax_hpp
 #define abstractsyntax_hpp
 
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <string>
-#include <memory>
+#include "collections/collections.hpp"
 
 namespace util{
-  typedef uint8_t u8;
+  typedef unsigned char u8;
 
   struct Token {
-    static const u8 UNSPEC{0};
-    static const u8 NO_CHILD{1};
-    static const u8 ONE_CHILD{2};
-    static const u8 TWO_CHILD{3};
-    static const u8 THREE_CHILD{4};
-    static const u8 FOUR_CHILD{5};
-    u8 level;
-    std::string message;
-    char rawTok;
-    Token(u8 level, std::string message, char rawTok) {
-      this->level = level;
-      this->message = message;
-      this->rawTok = rawTok;
-    }
-    static Token parse(std::string line) {
-      std::string temp;
-      std::istringstream iss(line);
-      char lev;
-      u8 tpe;
-      if (iss >> temp >> lev) {
-        switch (lev) {
-        case 'c':
-          tpe = Token::UNSPEC;
+    Str message;
+    u8 childNum;
+    static Token parse(Str line);
+  };
+
+  struct Types{
+    static const u8 NO_CHILD{0};
+    static const u8 ONE_CHILD{1};
+    static const u8 TWO_CHILD{2};
+    static const u8 THREE_CHILD{3};
+    static const u8 FOUR_CHILD{4};
+    static const u8 UNSPEC_CHILD{5};
+    static int typeToInt(u8 type){
+      switch (type){
+        case NO_CHILD:
+          return 0;
           break;
-        case '0':
-          tpe = Token::NO_CHILD;
+        case ONE_CHILD:
+          return 1;
           break;
-        case '1':
-          tpe = Token::ONE_CHILD;
+        case TWO_CHILD:
+          return 2;
           break;
-        case '2':
-          tpe = Token::TWO_CHILD;
+        case THREE_CHILD:
+          return 3;
           break;
-        case '3':
-          tpe = Token::THREE_CHILD;
+        case FOUR_CHILD:
+          return 4;
           break;
-        case '4':
-          tpe = Token::FOUR_CHILD;
+        case UNSPEC_CHILD:
+          return 5;
           break;
         default:
+          return -1;
           break;
-        }
-      }
-      return Token(tpe, temp, lev);
-    }
-  };
-
-  struct SortedTokens {
-    std::vector<Token> first, second, third, fourth, none, unspec;
-  };
-
-  struct IOError {
-    std::string message;
-    IOError(std::string message, int line) {
-      this->message = message;
-      message.append(std::to_string(line));
-    }
-  };
-
-  class TokenScraper {
-    std::ifstream file;
-    std::vector<Token> tokens;
-
-  public:
-    TokenScraper(std::string filename);
-    void parseFile();
-    struct SortedTokens sort();
-    ~TokenScraper();
-  };
-
-  TokenScraper::TokenScraper(std::string filename) {
-    file.open(filename);
-    if (!file.is_open() || file.peek() == file.eof()) {
-      throw new IOError("Cannot open file at line:", __LINE__);
-      file.close();
-      return;
-    }
-  }
-
-  void TokenScraper::parseFile() {
-    std::string temp;
-    while (getline(file, temp)) {
-      Token t = Token::parse(temp);
-      tokens.push_back(t);
-    }
-  }
-
-  TokenScraper::~TokenScraper() { file.close(); }
-
-  struct SortedTokens TokenScraper::sort() {
-    SortedTokens st;
-    for (int i = 0; i < tokens.size(); i++) {
-      switch (tokens[i].level) {
-      case Token::NO_CHILD:
-        st.none.push_back(tokens[i]);
-        break;
-      case Token::ONE_CHILD:
-        st.first.push_back(tokens[i]);
-        break;
-      case Token::TWO_CHILD:
-        st.second.push_back(tokens[i]);
-        break;
-      case Token::THREE_CHILD:
-        st.third.push_back(tokens[i]);
-        break;
-      case Token::FOUR_CHILD:
-        st.fourth.push_back(tokens[i]);
-        break;
-      case Token::UNSPEC:
-        st.unspec.push_back(tokens[i]);
-        break;
-      default:
-        break;
       }
     }
-    return st;
-  }
+  };
 
-  typedef struct{
-    std::vector<Token> tokens;
-    std::string tokenFileName;
-  } TokenSettings;
+  template<typename Syntax = Token>
+  struct AbstractNode{
+    Syntax token;
+    SmartPointer<AbstractNode<Syntax>> parent;
+    LinkedList<SmartPointer<AbstractNode<Syntax>>> children; 
+    AbstractNode(AbstractNode<Syntax>& an);
+    AbstractNode(AbstractNode<Syntax>&& an);
+    AbstractNode(Syntax token, SmartPointer<AbstractNode<Syntax>> parent, LinkedList<SmartPointer<AbstractNode<Syntax>>> children);
+  };
+
   
-  //template<typename Syntax = Token>
-  
+  template<typename Syntax = Token, typename Alloc = Allocator<Syntax>>
+  class AbstractSyntax: public virtual Iterator<AbstractNode<Syntax>>{
+    friend class Iterator<Syntax>;
+    using abstract_type = AbstractNode<Syntax>;
+    using iter_type = Iterator<AbstractNode<Syntax>>;
+    
+    
+    public:
+
+    AbstractSyntax();
+    AbstractSyntax(Syntax s);
+    AbstractSyntax(AbstractSyntax<Syntax, Alloc>& as);
+    AbstractSyntax(AbstractSyntax<Syntax, Alloc>&& as);
+    AbstractSyntax(LinkedList<Syntax> &linkedList);
     
 
+
+    void createBranch(SmartPointer<AbstractNode<Syntax>>& node, Syntax token);
+    void addToHead(Syntax token);
+    iter_type at(int iterNum, int tokenNum);
+
+    size_t getBranchSize();
+    size_t getEntireSize();
+    iter_type front();
+
+    SmartPointer<abstract_type> getHead();
+
+    Syntax& operator()(const int& xInd, const int& yInd);
+  
+    bool operator!=(const iter_type& other) const noexcept override;
+    bool operator==(const iter_type& other) const noexcept override;
+
+    iter_type &operator++() override;
+    iter_type &operator++(int) override;
+    
+    iter_type begin() const noexcept override;
+    iter_type end() const noexcept override;
+  
+    iter_type &operator+(const int& i) noexcept override;
+    iter_type &operator-(const int& i) noexcept override;
+
+    iter_type next() override;
+    iter_type prev() override;
+      
+  };
+    
+  
     
     
   

@@ -1,0 +1,19 @@
+@use:
+  TokenDiscriptor:
+    name: "@use",
+    type: "NO_CHILDREN",
+    count: "0"
+  Token:
+    TokenDiscriptor {
+      name: "@use", 
+      type: "NO_CHILDREN", 
+      count: "0"
+    },
+    token: "ARM",
+    possibleTokens: ["ARM", "AVR", "x86", "x86_64"]
+
+@start
+  TokenDiscriptor:
+    name: "@start",
+    type: "NO_CHILDREN",
+    

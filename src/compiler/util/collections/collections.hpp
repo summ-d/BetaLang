@@ -3,7 +3,13 @@
 
 #include "specialptr.hpp"
 #include <fstream>
+<<<<<<< HEAD:src/util/collections/collections.hpp
 #include <iostream>
+=======
+#include <string>
+#include <stdarg.h>
+#include <functional>
+>>>>>>> e9e0d95232fc36cd0360d6162ad807a7f501a218:src/compiler/util/collections/collections.hpp
 
 namespace util {
 typedef unsigned long size_t;
@@ -131,7 +137,7 @@ class String : public virtual Iterator<_String> {
   using iter_type = Iterator<_String>;
 
   Alloc allocator;
-  int count = 1;
+  static int count;
   size_t size = this->getSize();
 
   inline size_t getNonTermSize(ptr_type str) {
@@ -142,6 +148,9 @@ class String : public virtual Iterator<_String> {
   }
 
 public:
+  String();
+  
+  
   String(kPtr_type str) : Iterator<String>(str[0]) {
     if (str != nullptr) {
       size_t size = getNonTermSize((const char *)str);
@@ -198,6 +207,7 @@ public:
   ptr_type substr(int start, int end);
 
   String<_String> substr(int indStart, size_t size);
+  String<_String> substr(int indStart, _String delim = ' ');
 
   int *findAll(_String val);
   int* findAll(ptr_type val);
@@ -242,8 +252,8 @@ public:
   }
 
   type operator[](int pos);
-  String<type> operator=(kPtr_type& c);
-  void operator=(ptr_type& c);
+  String<type>& operator=(kPtr_type& c);
+  void operator=(const String<_String>& c);
 
   bool isEmpty(){ return this->str[0] == '\0'; }
 
@@ -256,11 +266,35 @@ public:
   Iterator<_String> prev() override;
 
   String<_String>& operator+(kPtr_type& str) noexcept;
-  void operator+=(kPtr_type& str) noexcept;
+  void operator+=(ptr_type& str) noexcept;
 
+  template<typename ...Args>
+  void format(kPtr_type str, Args&& ...args);
+
+  template<typename ...Args>
+  void format(Args&& ...args);
+
+  std::string asStdStr();
+  SmartPointer<std::ifstream> getline(std::ifstream& file, char delim = '\n');
+  
+  
 };
 
 typedef String<char> Str;
+
+template<typename Consumee>
+class Consumer{
+  std::function<void(Consumee)> pConsume;
+
+  public:
+  template<class Eater> 
+  Consumer<Consumee>(Eater consume): pConsume(consume){};
+
+  void accept(Consumee c){
+    pConsume(c);
+  }
+
+};
 
 template<typename _Link>
 struct Node{
@@ -275,7 +309,7 @@ struct Node{
 
 template <typename _Link, typename Alloc = Allocator<Node<_Link>>>
 class LinkedList: public virtual Iterator<Node<_Link>> {
- 
+  friend class Iterator<Node<_Link>>;
   using ptr_type = _Link*;
   using kPtr = const _Link*;
   using ref_type = _Link&;
@@ -284,10 +318,21 @@ class LinkedList: public virtual Iterator<Node<_Link>> {
   using node_type = Node<_Link>;
   using iter_type = Iterator<node_type>;
 
+  size_t size = this->getSize();
+
   SmartPointer<node_type> head;
   SmartPointer<node_type> tail;
 
+  static int count;
+
   public:
+
+  LinkedList(): iter_type(nullptr){
+    head->prev = nullptr;
+    head->next = tail;
+    tail->prev = head;
+    tail->next = nullptr;
+  }
 
   LinkedList(_Link data): iter_type(head){
     head = new Node<_Link>(data, nullptr, tail);
@@ -332,13 +377,20 @@ class LinkedList: public virtual Iterator<Node<_Link>> {
   void deleteLast();
   void deletePos(int pos);
 
+  size_t getSize();
+
   bool isEmpty();
   size_t getSize();
   
   _Link operator[](const int& i);
 
+  LinkedList<_Link> operator=(const LinkedList<_Link>& ll) noexcept;
+  void operator+=(const LinkedList<_Link>& ll) noexcept;
+
+  void forEach(Consumer<node_type> c);
+
   //inherited methods from `Iterator<_Iter>`
-  bool operator!=(const Iterator<node_type>& other) const noexcept override;
+  bool operator!=(const Iterator<node_type>& i2) const noexcept override;
   bool operator==(const Iterator<node_type>& other) const noexcept override;
   
   Iterator<node_type> &operator++() override;
@@ -347,8 +399,8 @@ class LinkedList: public virtual Iterator<Node<_Link>> {
   Iterator<node_type> begin() const noexcept override;
   Iterator<node_type> end() const noexcept override;
 
-  Iterator<node_type> operator+(const int& i) noexcept override;
-  Iterator<node_type> operator-(const int& i) noexcept override;
+  Iterator<node_type>& operator+(const int& i) noexcept override;
+  Iterator<node_type>& operator-(const int& i) noexcept override;
 
   Iterator<node_type> next() override;
   Iterator<node_type> prev() override;
