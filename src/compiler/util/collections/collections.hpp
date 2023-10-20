@@ -3,13 +3,9 @@
 
 #include "specialptr.hpp"
 #include <fstream>
-<<<<<<< HEAD:src/util/collections/collections.hpp
-#include <iostream>
-=======
 #include <string>
 #include <stdarg.h>
 #include <functional>
->>>>>>> e9e0d95232fc36cd0360d6162ad807a7f501a218:src/compiler/util/collections/collections.hpp
 
 namespace util {
 typedef unsigned long size_t;
@@ -256,8 +252,6 @@ public:
   void operator=(const String<_String>& c);
 
   bool isEmpty(){ return this->str[0] == '\0'; }
-
-  std::ifstream& getline(std::ifstream& file, char delim = '\n');
   
   friend std::ostream& operator<<(std::ostream& o, const String<_String>& s){}
   friend std::istream& operator>>(std::istream& i, const String<_String>& s){}
@@ -269,10 +263,10 @@ public:
   void operator+=(ptr_type& str) noexcept;
 
   template<typename ...Args>
-  void format(kPtr_type str, Args&& ...args);
+  void format(kPtr_type str, Args&& ...args){}
 
   template<typename ...Args>
-  void format(Args&& ...args);
+  void format(Args&& ...args){}
 
   std::string asStdStr();
   SmartPointer<std::ifstream> getline(std::ifstream& file, char delim = '\n');

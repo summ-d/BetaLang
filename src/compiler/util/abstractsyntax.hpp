@@ -14,12 +14,26 @@ namespace util{
     static TokenDiscriptor parse(Str s);
   };
 
+  struct LangToken{
+    
+  };
   struct Token{
     TokenDiscriptor td;
     Str token;
     
+  };
+
+
+  class TokenDiscriptorScraper{};
+
+  class TokenConstScraper{
+    std::ofstream outFile;
+    std::ifstream inFile;
+
+    public:
+      TokenConstScraper(Str name = "const.tk");
+
   };  
-    
   
   
   

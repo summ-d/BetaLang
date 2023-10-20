@@ -223,11 +223,6 @@ namespace util{
     this->str = c.asCstr();
   }
 
-  DEFAULT_TEMPLATE_STRING
-  std::ifstream& String<_String, Alloc>::getline(std::ifstream& file, char delim = '\n'){
-    
-  }
-
 
   DEFAULT_TEMPLATE_STRING
   Iterator<_String> String<_String, Alloc>::next(){
@@ -318,15 +313,9 @@ namespace util{
 
   DEFAULT_TEMPLATE_LIST
   void LinkedList<_Link, Alloc>::push(_Link data){
-<<<<<<< HEAD:src/util/collections/collections.cpp
-    SmartPointer<node_type> node = new node_type(data, head, head->next);
-    head->next->prev = node;
-    head->next = node;
-=======
     SmartPointer<Node<_Link>> new_node = new Node<_Link>(data, head, head->next);
     head->next->prev = new_node;
     head->next = new_node;
->>>>>>> e9e0d95232fc36cd0360d6162ad807a7f501a218:src/compiler/util/collections/collections.cpp
   }
 
   DEFAULT_TEMPLATE_LIST
@@ -507,16 +496,7 @@ namespace util{
 
   DEFAULT_TEMPLATE_LIST
   Iterator<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::end() const noexcept{
-<<<<<<< HEAD:src/util/collections/collections.cpp
-
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  Iterator<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::operator+(const int& i) noexcept{
-    
-=======
     return tail->next;
->>>>>>> e9e0d95232fc36cd0360d6162ad807a7f501a218:src/compiler/util/collections/collections.cpp
   }
 
   DEFAULT_TEMPLATE_LIST
