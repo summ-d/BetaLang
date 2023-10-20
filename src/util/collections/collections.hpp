@@ -2,6 +2,8 @@
 #define collections_hpp
 
 #include "specialptr.hpp"
+#include <fstream>
+#include <iostream>
 
 namespace util {
 typedef unsigned long size_t;
@@ -245,6 +247,11 @@ public:
 
   bool isEmpty(){ return this->str[0] == '\0'; }
 
+  std::ifstream& getline(std::ifstream& file, char delim = '\n');
+  
+  friend std::ostream& operator<<(std::ostream& o, const String<_String>& s){}
+  friend std::istream& operator>>(std::istream& i, const String<_String>& s){}
+
   Iterator<_String> next() override;
   Iterator<_String> prev() override;
 
@@ -326,6 +333,7 @@ class LinkedList: public virtual Iterator<Node<_Link>> {
   void deletePos(int pos);
 
   bool isEmpty();
+  size_t getSize();
   
   _Link operator[](const int& i);
 

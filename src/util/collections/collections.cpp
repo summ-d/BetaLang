@@ -191,6 +191,12 @@ namespace util{
   }
 
   DEFAULT_TEMPLATE_STRING
+  std::ifstream& String<_String, Alloc>::getline(std::ifstream& file, char delim = '\n'){
+    
+  }
+
+
+  DEFAULT_TEMPLATE_STRING
   Iterator<_String> String<_String, Alloc>::next(){
     return str[iter_type::current + 1];
   }
@@ -257,7 +263,9 @@ namespace util{
 
   DEFAULT_TEMPLATE_LIST
   void LinkedList<_Link, Alloc>::push(_Link data){
-    
+    SmartPointer<node_type> node = new node_type(data, head, head->next);
+    head->next->prev = node;
+    head->next = node;
   }
 
   DEFAULT_TEMPLATE_LIST
@@ -331,6 +339,11 @@ namespace util{
   }
 
   DEFAULT_TEMPLATE_LIST
+  size_t LinkedList<_Link, Alloc>::getSize(){
+    
+  }
+
+  DEFAULT_TEMPLATE_LIST
   _Link LinkedList<_Link, Alloc>::operator[](const int& i){
     
   }
@@ -358,6 +371,11 @@ namespace util{
   DEFAULT_TEMPLATE_LIST
   Iterator<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::begin() const noexcept{
     
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  Iterator<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::end() const noexcept{
+
   }
 
   DEFAULT_TEMPLATE_LIST
