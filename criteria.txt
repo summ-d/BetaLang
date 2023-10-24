@@ -1,0 +1,7 @@
+Requirements for BetaLang:
+  1. It must have zero-cost abstraction
+  2. Modular code cannot sacrifice performance
+  3. Generics cannot have performance issues similar to C++
+  4. If the library is @included, it must have a strict one-include policy for every library.
+  
+  
