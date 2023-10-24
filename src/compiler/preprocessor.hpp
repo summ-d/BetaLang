@@ -6,7 +6,7 @@
 #include "util/collections/specialptr.hpp"
 #include <fstream>
 
-namespace beta {
+namespace beta::preproc {
   
 } // namespace beta
 
