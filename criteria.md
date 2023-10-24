@@ -24,13 +24,13 @@ Solutions:
         ```
         Instead of runtime checking, the object Test will be checked for methods at compile time. If it is incorrect, the code will not be valid.
         so instead of trying to check at runtime, the check will happen at compile time, thus making it a zero-cost abstraction.
-  For numbers 2 & 4:
+  For numbers 2 & 4: \
     One of the biggest problems with C and C++ is that producing modular code that can be nicely organized can make a huge hit on the performance of the program. Sometimes
-    putting all of your codebase in one massive file that is ugly could save hours of compile time, as highlighted by this [answer]. 
-    The Solution:
-      The problem is already mostly solved by the `import` keyword. The ONLY time anything will be copied/pasted into your file is when the function, composition, or object is
-      instantiated. However, there is another keyword. The `@include` preprocessor is discouraged, but if it is really needed it is there. There are strict rules that are in-place
-      for this
+    putting all of your codebase in one massive file that is ugly could save hours of compile time, as highlighted by this [answer](https://stackoverflow.com/a/318495/21485913).\  
+    The Solution:\
+      The problem is already mostly solved by the `import` keyword. The ONLY time anything will be copied/pasted into your file is when the function, composition, or object is\
+      instantiated. However, there is another keyword. The `@include` preprocessor is discouraged, but if it is really needed it is there. There are strict rules that are in-place\
+      for this\
     
 
 
@@ -38,7 +38,6 @@ Solutions:
 
 
 
-    [answer]: (https://stackoverflow.com/a/318495/21485913)
 
         
 
