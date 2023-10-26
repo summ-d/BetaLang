@@ -6,6 +6,7 @@
 #include <string>
 #include <stdarg.h>
 #include <functional>
+#include <type_traits>
 
 namespace util {
 typedef unsigned long size_t;
@@ -28,6 +29,25 @@ inline bool strcmp(const char *s1, const char *s2) {
   return true;
 }
 
+template<typename T> concept is_number = std::is_arithmetic<T>::value;
+
+template<is_number Num>
+inline int getDigits(Num n){
+  int digits = 0;
+  Num num = n;
+  do{
+    num /= 10;
+    digits++;
+  } while (num != 0);
+  
+}
+
+  int getSize(const char* str){
+    const char* s;
+    for(s = str; *s; ++s);
+    return(s - str);
+  }
+
 template <typename Alloc> class Allocator {
 public:
   using val_type = Alloc;
@@ -43,6 +63,16 @@ public:
 
   ptr_type address(ref_type ref);
 };
+
+
+template<typename Alloc = Allocator<char>>
+inline void strcpy(Alloc& a, char* src, char* dest){
+  dest = a.allocate(getSize(src));
+  for(int i = 0; i < getSize(src); i++){
+    dest[i] = src[i];
+  }
+  return;
+}
 
 namespace assert {
 struct AssErr {
@@ -87,6 +117,11 @@ public:
 };
 } // namespace option
 
+struct FormatError{
+  int line;
+  const char* message;
+};
+
 template <typename _String, typename Alloc = Allocator<_String>>
 class String{
   _String *str;
@@ -106,6 +141,12 @@ class String{
     for (s = str; *s; ++s)
       ;
     return (s - str);
+  }
+
+  inline int getArrSize(int *arr){
+    const int *a
+    for(a = arr; *a; ++a);
+    return(a - arr);
   }
 
 public:
@@ -154,14 +195,84 @@ public:
 
   bool isEmpty(){ return this->str[0] == '\0'; }
   
-  friend std::ostream& operator<<(std::ostream& o, const String<_String>& s){}
-  friend std::istream& operator>>(std::istream& i, const String<_String>& s){}
+  friend std::ostream& operator<<(std::ostream& o, const String<_String>& s){
+    o << s.asCstr();
+    return o;
+  }
+  friend std::istream& operator>>(std::istream& i, const String<_String>& s){
+    const char* s2;
+    i >> s2;
+    s = s2;
+    return i;
+  }
 
   String<_String>& operator+(kPtr_type& str) noexcept;
   void operator+=(ptr_type& str) noexcept;
 
+
+  // Documentation Time!!! This has become so F****ng complex that
+  // I dont even know what the hell is going on here
   template<typename ...Args>
-  void format(kPtr_type str, Args&& ...args){}
+  void format(kPtr_type str, Args&& ...args){ // takes in the string and formatting arguments
+    strcpy(allocator, str, this->str);
+    int* arr = this->findAll("%s"); // finds the instances of the markers
+    int* arr2 = this->findAll("%n");
+    // First error handling, checks if either is a nullptr and gets the size
+    // if either aren't
+    if(arr != nullptr || arr2 != nullptr){
+      int arrSize1 = getArrSize(arr);
+      int arrSize2 = getArrSize(arr2);
+    }
+    // gets the sizeof the args and checks if its equal
+    if(sizeof...(args) != (arrSize1 + arrSize2)){
+      FormatError e;
+      e.line = __LINE__;
+      e.message = "The amount of arguments does not match";
+      throw e;
+      return;
+    }
+    // just declaring more local shit
+    int countN = 0;
+    int countS = 0;
+    for(int i = 0; i < sizeof...(args); i++){
+      // special shit for numbers
+      if(std::is_arithmetic<args[i]>::value){
+        int digits = getDigits(args[i]);
+        // buncha allocator shit
+        ptr_type new_str = allocator.allocNum((this->size + digits) - 2);
+        for(int i = 0; i < (this->size + digits) - 2; i++){
+          new_str[i] = this->str[i];
+          if(arr2[countN] == i){
+            // what the f**k
+            new_str[i] = std::to_string(args[i]).c_str()[i - arr2[countN]];
+            // incrementing the counter
+            countN++;
+          }
+        }
+        // basically a strcpy function inline
+        strcpy(allocator, new_str, this->str);
+      }
+      if(std::is_same<args[i], std::string>::value){
+        ptr_type s = allocator.allocNum(args[i].length());
+        strcpy(allocator, args[i].data(), s);
+        ptr_type new_str = allocator.allocNum((getSize(this->str) + args[i].length()) - 2);
+        for(int i = 0; i < (getSize(this->str) + args[i].length()) - 2; i++){
+          new_str[i] = this->str[i];
+          if(arr[countS] == i){
+            new_str[i] = s[i - arr[countS]];
+            countS++;
+          }
+        }
+        strcpy(allocator, new_str, this->str);
+      }
+      if(std::is_same<args[i], String<_String>>::value){
+
+      }
+      if(std::is_same<args[i], const char*>::value){
+
+      }
+    }
+  }
 
   template<typename ...Args>
   void format(Args&& ...args){}

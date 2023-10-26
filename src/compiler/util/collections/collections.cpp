@@ -284,6 +284,7 @@ namespace util{
   }
 
   
+  
   template<typename _Link>
   Node<_Link>::Node(){
     prev = nullptr;
