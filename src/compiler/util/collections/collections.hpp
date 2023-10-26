@@ -202,7 +202,7 @@ public:
   friend std::istream& operator>>(std::istream& i, const String<_String>& s){
     const char* s2;
     i >> s2;
-    s = s2;
+    strcpy(allocator, s2, s.asStdStr().data());
     return i;
   }
 
@@ -253,10 +253,25 @@ public:
         strcpy(allocator, new_str, this->str);
       }
       if(std::is_same<args[i], std::string>::value){
+        // More Allocations
         ptr_type s = allocator.allocNum(args[i].length());
         strcpy(allocator, args[i].data(), s);
         ptr_type new_str = allocator.allocNum((getSize(this->str) + args[i].length()) - 2);
         for(int i = 0; i < (getSize(this->str) + args[i].length()) - 2; i++){
+          new_str[i] = this->str[i];
+          if(arr[countS] == i){
+            // modifed strcpy basically
+            new_str[i] = s[i - arr[countS]];
+            countS++;
+          }
+        }
+        strcpy(allocator, new_str, this->str);
+      }
+      if(std::is_same<args[i], String<_String>>::value){
+        ptr_type s = allocator.allocNum(args[i].getSize());
+        strcpy(allocator, args[i].asStdStr().data(), s);
+        ptr_type new_str = allocator.allocNum((getSize(this->str) + args[i].getSize()) - 2);
+        for(int i = 0; i < (getSize(this->str) + args[i].getSize()) - 2; i++){
           new_str[i] = this->str[i];
           if(arr[countS] == i){
             new_str[i] = s[i - arr[countS]];
@@ -265,17 +280,32 @@ public:
         }
         strcpy(allocator, new_str, this->str);
       }
-      if(std::is_same<args[i], String<_String>>::value){
-
-      }
       if(std::is_same<args[i], const char*>::value){
-
+        ptr_type s = allocator.allocNum(getSize(args[i]));
+        strcpy(allocator, args[i], s);
+        ptr_type new_str = allocator.allocNum((getSize(args[i]) + getSize(this->str)) - 2);
+        for(int i = 0; i < (getSize(this->str) + getSize(args[i])) - 2; i++){
+          new_str[i] = this->str[i];
+          if(arr[countS] == i){
+            new_str[i] = s[i - arr[countS]];
+            countS++;
+          }
+        }
+        strcpy(allocator, new_str, this->str);
       }
     }
   }
 
   template<typename ...Args>
-  void format(Args&& ...args){}
+  void format(Args&& ...args){ // takes in just args
+    // why reinvent the wheel when you have a perfectly good function
+    // already? 
+    try{
+    this->format((kPtr_type)this->str, args);
+    } catch(FormatError e){
+      throw e;
+    }
+  }
 
   std::string asStdStr();
   SmartPointer<std::ifstream> getline(std::ifstream& file, char delim = '\n');

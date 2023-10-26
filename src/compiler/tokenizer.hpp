@@ -3,12 +3,22 @@
 #define TOKENIZER_HPP
 
     #include "util/collections/collections.hpp"
+    #include <sstream>
 
     namespace beta::token{
+        enum Children{
+            NONE,
+            ONE,
+            TWO,
+            THREE, 
+            FOUR, 
+            UNSPEC
+        };
+
 
         typedef struct TokenType{
             util::Str token;
-            util::u8 type;
+            Children childNum;
         } toktype_t;
 
         class TokenScraper{

@@ -19,14 +19,42 @@ namespace beta::token{
     }
 
     util::LinkedList<TokenType> TokenScraper::parseTokens(){
-        this->lines.forEach([](util::Str &s){
+        util::LinkedList<TokenType> tokens;
+        this->lines.forEach([&tokens](util::Str &s){
             toktype_t tok;
-            
+            std::istringstream parser;
+            char delim;
+            char num;
+            parser >> tok.token >> delim >> num;
+            switch(num){
+                case '0':
+                    tok.childNum = Children::NONE;
+                    break;
+                case '1':
+                    tok.childNum = Children::ONE;
+                    break;
+                case '2':
+                    tok.childNum = Children::TWO;
+                    break;
+                case '3':
+                    tok.childNum = Children::THREE;
+                    break;
+                case '4':
+                    tok.childNum = Children::FOUR;
+                    break;
+                case 'C':
+                    tok.childNum = Children::UNSPEC;
+                    break;
+                default:
+                    break;
+            }
+            tokens.append(tok);
         });
+        return tokens;
     }
 
     TokenScraper::~TokenScraper(){
-
+        file.close();
     }
 
     ToToken::ToToken(util::LinkedList<util::Str>& linkedList){
