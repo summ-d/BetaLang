@@ -68,19 +68,32 @@ namespace beta::token{
     // anatomy of a token:
     // @use JVM;
     // <keyword> <value>
-
-    void ToToken::parse(util::LinkedList<TokenType> tokenList){
-        this->tokens.forEach([&tokenList, this](util::Str &s){
-            
+    
+    void ToToken::parse(){
+        this->tokens.forEach([this](util::Str &s){
+            util::string p[2];
+            s.makeStream() >> p[0] >> p[1]; 
+            this->parts[0].append(p[0]);
+            this->parts[1].append(p[1]);
         });
     }
 
-    util::LinkedList<Token>& ToToken::toTokens(){
-
-    }
-
-    ToToken::~ToToken(){
-
+    util::LinkedList<Token>& ToToken::toTokens(util::LinkedList<TokenType> tokenList){
+        TokenList tl;
+        this->parts[0].forEach([this, &tokenList, &tl](util::string& s){
+            int count = 0;
+            tokenList.forEach([&s, &tl, &count, this](toktype_t &tok){
+                if(util::strcmp(tok.token.asCstr(), s.asCstr())){
+                    token_t t;
+                    t.token = this->parts[1].getAt(count);
+                    t.tokenType.childNum = tok.childNum;
+                    t.tokenType.token = tok.token;
+                    tl.append(t);
+                }
+            });
+            count++;
+        });
+        return tl;
     }
 
 }

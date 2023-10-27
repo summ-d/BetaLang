@@ -41,17 +41,18 @@
             toktype_t tokenType;
             util::Str token;
         } token_t;
+
+        typedef util::LinkedList<Token> TokenList;
         
         class ToToken{
             util::LinkedList<util::Str> tokens;
             util::LinkedList<util::Str> parts[2];
-            //util::LinkedList<util::Str> partTwo;
 
             public:
             ToToken(util::LinkedList<util::Str>& linkedList);
-            void parse(util::LinkedList<TokenType> tokenList);
-            util::LinkedList<Token>& toTokens();
-            ~ToToken();
+            void parse();
+            util::LinkedList<Token>& toTokens(util::LinkedList<TokenType> tokenList);
+            
         };
 
     }
