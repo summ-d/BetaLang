@@ -283,7 +283,10 @@ namespace util{
     return std::string(this->asCstr());
   }
 
-  
+  DEFAULT_TEMPLATE_STRING
+  std::istringstream String<_String, Alloc>::makeStream(){
+    return std::istringstream(this->asStdStr());
+  }
   
   template<typename _Link>
   Node<_Link>::Node(){

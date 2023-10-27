@@ -63,8 +63,14 @@ namespace beta::token{
         });
     }
 
-    void ToToken::parse(){
-        this->tokens.forEach([](util::Str &s){
+    // tokenList is the list of tokens.
+    // tokens is the list of tokens
+    // anatomy of a token:
+    // @use JVM;
+    // <keyword> <value>
+
+    void ToToken::parse(util::LinkedList<TokenType> tokenList){
+        this->tokens.forEach([&tokenList, this](util::Str &s){
             
         });
     }

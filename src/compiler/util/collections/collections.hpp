@@ -202,7 +202,9 @@ public:
   friend std::istream& operator>>(std::istream& i, const String<_String>& s){
     const char* s2;
     i >> s2;
-    strcpy(allocator, s2, s.asStdStr().data());
+    for(int j = 0; j < getSize(s2); j++){
+      s[j] = s2[j];
+    }
     return i;
   }
 
@@ -310,10 +312,12 @@ public:
   std::string asStdStr();
   SmartPointer<std::ifstream> getline(std::ifstream& file, char delim = '\n');
   
-  
+  std::istringstream makeStream();
+
 };
 
 typedef String<char> Str;
+typedef Str string;
 
 template<typename Consumee>
 class Consumer{

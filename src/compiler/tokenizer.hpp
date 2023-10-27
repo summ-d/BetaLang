@@ -44,10 +44,12 @@
         
         class ToToken{
             util::LinkedList<util::Str> tokens;
+            util::LinkedList<util::Str> parts[2];
+            //util::LinkedList<util::Str> partTwo;
 
             public:
             ToToken(util::LinkedList<util::Str>& linkedList);
-            void parse();
+            void parse(util::LinkedList<TokenType> tokenList);
             util::LinkedList<Token>& toTokens();
             ~ToToken();
         };
