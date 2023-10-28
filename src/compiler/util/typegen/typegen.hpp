@@ -8,6 +8,14 @@ namespace util{
 
     };
 
+    enum PossibleArch{
+        ARM,
+        AVR,
+        X86_32,
+        X86_64,
+        JVM
+    };
+
 }
 
 

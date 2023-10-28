@@ -55,33 +55,42 @@ namespace util{
       }
   }
 
-  template<typename _Iter>
-  Iterator<_Iter>::Iterator() noexcept{
-    current = nullptr;
-  }
-
-  template<typename _Iter>
-  Iterator<_Iter>::Iterator(kpr ref) noexcept{
-    current = ref;
-  }
-
-  DEFAULT_TEMPLATE_STRING
+  template <typename _String, typename Alloc>
   String<_String, Alloc>::String(){
     this->str = allocator.allocNum(1);
     str[0] = '\0';
     return;
   }
 
+  template <typename _String, typename Alloc>
+  String<_String, Alloc>::String(kPtr_type str){
+
+  }
+
+  template<typename _String, typename Alloc>
+  String<_String, Alloc>::String(String<_String>& str){
+
+  } 
+
+  template<typename _String, typename Alloc>
+  String<_String, Alloc>::String(String<_String>&& str){
+
+  }
+
+
   DEFAULT_TEMPLATE_STRING
-  void String<_String, Alloc>::concat(String<_String> &s){
-    ptr_type new_string = allocator.allocate(this->size + s.getSize());
-    for(int i = 0; i < sizeof(new_string); i++){
-      new_string[i] = str[i];
-      if(i == this->size){
-        new_string[i] = s.asCstr()[i - this->size];
+  void String<_String, Alloc>::concat(String<_String> &s)
+  {
+      ptr_type new_string = allocator.allocate(this->size + s.getSize());
+      for (int i = 0; i < sizeof(new_string); i++)
+      {
+          new_string[i] = str[i];
+          if (i == this->size)
+          {
+              new_string[i] = s.asCstr()[i - this->size];
+          }
       }
-    }
-    str = new_string;
+      str = new_string;
   }
 
   DEFAULT_TEMPLATE_STRING
@@ -224,16 +233,7 @@ namespace util{
   }
 
 
-  DEFAULT_TEMPLATE_STRING
-  Iterator<_String> String<_String, Alloc>::next(){
-    return str[iter_type::current + 1];
-  }
-
-  DEFAULT_TEMPLATE_STRING
-  Iterator<_String> String<_String, Alloc>::prev(){
-    return str[iter_type::current - 1];
-  }
-
+ 
   DEFAULT_TEMPLATE_STRING
   String<_String> &String<_String, Alloc>::operator+(kPtr_type& str) noexcept{
     size_t size = this->getNonTermSize(str);
@@ -283,32 +283,46 @@ namespace util{
     return std::string(this->asCstr());
   }
 
+  DEFAULT_TEMPLATE_STRING
+  std::istringstream String<_String, Alloc>::makeStream(){
+    return std::istringstream(this->asStdStr());
+  }
   
-  DEF_NODE
+  template<typename _Link>
   Node<_Link>::Node(){
     prev = nullptr;
     next = nullptr;
   }
 
-  DEF_NODE
+  template<typename _Link>
   Node<_Link>::Node(_Link data, SmartPointer<Node<_Link>> prev, SmartPointer<Node<_Link>> next){
     this->data = data;
     this->next = next;
     this->prev = prev;
   } 
 
-  DEF_NODE 
+  template<typename _Link>
   Node<_Link>::Node(Node<_Link>& n){
     this->data = n.data;
     this->next = n.next;
     this->prev = n.prev;
   }
 
-  DEF_NODE
+  template<typename _Link>
   Node<_Link>::Node(Node<_Link>&& n){
     this->data = n.data;
     this->next = n.next;
     this->prev = n.prev;
+  }
+
+  template<typename _Link, typename Alloc>
+  LinkedList<_Link, Alloc>::LinkedList(LinkedList<type>& ll){
+
+  }
+
+  template<typename _Link, typename Alloc>
+  LinkedList<_Link, Alloc>::LinkedList(LinkedList<type>&& ll){
+
   }
 
   DEFAULT_TEMPLATE_LIST
@@ -355,50 +369,24 @@ namespace util{
   }
 
   DEFAULT_TEMPLATE_LIST
-  typename LinkedList<_Link, Alloc>::iter_type LinkedList<_Link, Alloc>::at(int pos){
+  _Link LinkedList<_Link, Alloc>::getFront(){
+    return this->head->data;
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  _Link LinkedList<_Link, Alloc>::getBack(){
+    return this->tail->data;
+  }
+
+  DEFAULT_TEMPLATE_LIST
+  _Link LinkedList<_Link, Alloc>::getAt(int pos){
     SmartPointer<node_type> temp = head;
     int i = 0;
-    while(temp != nullptr && i < pos){
+    while (temp->next != nullptr && i < pos){
       temp = temp->next;
       i++;
     }
-    return *temp.get();
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  typename LinkedList<_Link, Alloc>::iter_type LinkedList<_Link, Alloc>::at(iter_type (*fun)){
-    return fun;
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  typename LinkedList<_Link, Alloc>::iter_type LinkedList<_Link, Alloc>::front(){
-    return *head.get();
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  typename LinkedList<_Link, Alloc>::iter_type LinkedList<_Link, Alloc>::back(){
-    return *tail.get();
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  SmartPointer<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::getFront(){
-    return head;
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  SmartPointer<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::getBack(){
-    return tail;
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  SmartPointer<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::getAt(int pos){
-    SmartPointer<Node<_Link>> temp = head;
-    int i = 0;
-    while(temp != nullptr && i < pos){
-      temp = temp->next;
-      i++;
-    }
-    return temp;
+    return temp->data;
   }
 
   DEFAULT_TEMPLATE_LIST
@@ -449,13 +437,26 @@ namespace util{
   }
 
   DEFAULT_TEMPLATE_LIST
-  size_t LinkedList<_Link, Alloc>::getSize(){
-    
+  _Link LinkedList<_Link, Alloc>::operator[](const int& i){
+    return this->getAt(i);
+  }
+
+
+  DEFAULT_TEMPLATE_LIST
+  LinkedList<_Link>& LinkedList<_Link, Alloc>::operator=(const LinkedList<_Link>& ll) noexcept{
+    LinkedList<_Link> linkedList;
+    for(int i = 0; i < ll.getSize(); i++){
+      linkedList.append(ll[i]);
+    }
+    return ll;
   }
 
   DEFAULT_TEMPLATE_LIST
-  _Link LinkedList<_Link, Alloc>::operator[](const int& i){
-     return this->at(i); 
+  void LinkedList<_Link, Alloc>::operator+=(const LinkedList<_Link>& ll) noexcept{
+    for(int i = 0; i < ll.getSize(); i++){
+      this->append(ll[i]);
+    }
+    return;
   }
 
   DEFAULT_TEMPLATE_LIST
@@ -464,60 +465,5 @@ namespace util{
       c.accept(this[i]);
     }
   }
-
-  DEFAULT_TEMPLATE_LIST
-  bool LinkedList<_Link, Alloc>::operator!=(const Iterator<node_type>& i2) const noexcept{
-    return iter_type::current != *i2;
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  bool LinkedList<_Link, Alloc>::operator==(const Iterator<node_type>& other) const noexcept{
-    return iter_type::current == *other;
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  Iterator<typename LinkedList<_Link, Alloc>::node_type> &LinkedList<_Link, Alloc>::operator++(){
-    iter_type::prev = iter_type::current;
-    iter_type::current = this->at(count);
-    count++;
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  Iterator<typename LinkedList<_Link, Alloc>::node_type> &LinkedList<_Link, Alloc>::operator++(int){
-    iter_type temp = *this;
-    ++*this;
-    return temp;
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  Iterator<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::begin() const noexcept{
-    return this[0];
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  Iterator<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::end() const noexcept{
-    return tail->next;
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  Iterator<typename LinkedList<_Link, Alloc>::node_type>& LinkedList<_Link, Alloc>::operator+(const int& i) noexcept{
-    return this[iter_type::current + i];
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  Iterator<typename LinkedList<_Link, Alloc>::node_type>& LinkedList<_Link, Alloc>::operator-(const int& i) noexcept{
-    return this[iter_type::current - i];
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  Iterator<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::next(){
-    return this[iter_type::current + 1];
-  }
-
-  DEFAULT_TEMPLATE_LIST
-  Iterator<typename LinkedList<_Link, Alloc>::node_type> LinkedList<_Link, Alloc>::prev(){
-    return iter_type::prev;
-  }
-  
   
 }

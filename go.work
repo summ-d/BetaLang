@@ -1,0 +1,7 @@
+go 1.21.2
+
+use (
+	./src/cli
+	./src/cli/cliframework
+	./src/cli/linkedlist
+)
