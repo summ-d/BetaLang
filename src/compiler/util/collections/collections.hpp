@@ -15,11 +15,31 @@ typedef unsigned char u8;
   //struct Helper{ static void NOT_IMPLEMENTED(); };
   //#define NOT_IMPLEMENTED() Helper::NOT_IMPLEMENTED();
   
-
+/* 
+  @brief Default Template Arguments for the `String<_String, Alloc>` class.
+  This is probably stupid and whatever but I don't care at all.
+  It makes my life waaay easier
+*/
 #define DEFAULT_TEMPLATE_STRING template<typename _String, typename Alloc>
+
+/*
+  @brief Same thing as `DEFAULT_TEMPLATE_STRING` but for the 
+  `LinkedList<_Link, Alloc>` class. See `DEFAULT_TEMPLATE_STRING`
+  for reason.
+*/
 #define DEFAULT_TEMPLATE_LIST template<typename _Link, typename Alloc>
+
+/*
+  @brief Same Thing for the other two but for the `Node<_Link>` class.
+*/
 #define DEF_NODE template<typename _Link>
   
+/*
+  @brief Comparing 2 strings
+  @param s1 The first String
+  @param s2 The second String
+  @return `bool` 
+*/  
 inline bool strcmp(const char *s1, const char *s2) {
   for (int i = 0; s1[i] != '\0'; i++) {
     if (s1[i] != s2[i] || s2[i] == '\0') {
@@ -29,8 +49,14 @@ inline bool strcmp(const char *s1, const char *s2) {
   return true;
 }
 
-template<typename T> concept is_number = std::is_arithmetic<T>::value;
 
+
+template<typename T> concept is_number = std::is_arithmetic<T>::value;
+/*
+  @brief Gets the number of digits in a number
+  @param n the number to check
+  @return `int`
+*/
 template<is_number Num>
 inline int getDigits(Num n){
   int digits = 0;
@@ -42,12 +68,23 @@ inline int getDigits(Num n){
   
 }
 
+  /*
+    @brief Gets the size of a string
+    @param str the string to check
+    @return `int`
+  */
   int getSize(const char* str){
     const char* s;
     for(s = str; *s; ++s);
     return(s - str);
   }
 
+
+  /*
+    @class The default alllocator for the 
+    `String<_String, Alloc>` and the `LinkedList<_Link, Alloc`
+    classes
+  */
 template <typename Alloc> class Allocator {
 public:
   using val_type = Alloc;
@@ -74,6 +111,9 @@ inline void strcpy(Alloc& a, char* src, char* dest){
   return;
 }
 
+/*
+  
+*/
 namespace assert {
 struct AssErr {
   char *message;

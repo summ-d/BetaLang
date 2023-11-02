@@ -3,24 +3,21 @@
 #define LEXER_HPP
 
     #include "tokenizer.hpp"
-    #include "typegen/typegen.hpp"
+    #include "globals.hpp"
 
     namespace beta::lexer{
-    // Temporary struct to prevent errors
-    typedef struct GlobalConfig {
-        util::string fileName;
-        util::string startPoint;
-        util::PossibleArch arch;
-    } globconfig_t;
     
+
 
     class Lexer{
         util::LinkedList<util::Str> tokens;
         token::TokenList tokenList;
+        util::LinkedList<token::TokenType> possibleTokens;
         std::ifstream file;
+        token::TokenScraper ts;
 
         public:
-        Lexer(globconfig_t gc);
+        Lexer(globals::globconfig_t gc);
         void getTokens();
         void parseToTokens();
         void sortToStart();
