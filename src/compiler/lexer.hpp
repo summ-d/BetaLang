@@ -7,6 +7,15 @@
 
     namespace beta::lexer{
     
+    struct InvalidToken: public err::BaseError{
+        token::token_t token;
+        void print() const override;  
+    };
+
+    struct NoMain: public err::BaseError{
+        void print() const override;
+        util::string fileName;
+    };
 
 
     class Lexer{
@@ -15,6 +24,7 @@
         util::LinkedList<token::TokenType> possibleTokens;
         std::ifstream file;
         token::TokenScraper ts;
+        globals::globconfig_t config;
 
         public:
         Lexer(globals::globconfig_t gc);
@@ -24,6 +34,6 @@
         util::LinkedList<util::Str> expose();
         ~Lexer();
     };
+    
     }
-
 #endif

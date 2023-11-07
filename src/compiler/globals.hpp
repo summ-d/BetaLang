@@ -18,9 +18,7 @@ namespace beta::globals {
     typedef struct IOError: public virtual err::BaseError{
         util::string fileName; 
         void print() const override{
-            std::cout << "error: " << this->message 
-            << "At Line:" << this->line 
-            << "Opening: " << this->fileName << "\n";
+            std::cout << "error Opening File\n";
         }
     };
 

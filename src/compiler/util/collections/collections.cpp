@@ -1,16 +1,9 @@
 #include "collections.hpp"
 
-
 namespace util{
-
-  DEFAULT_TEMPLATE_STRING
-  int String<_String, Alloc>::count = 1;
-
-  DEFAULT_TEMPLATE_LIST
-  int LinkedList<_Link, Alloc>::count = 1;
   
   template<typename Alloc>
-  typename Allocator<Alloc>::ptr_type Allocator<Alloc>::allocate(util::size_t size){
+  Alloc* Allocator<Alloc>::allocate(util::size_t size){
       void* ptr = new u8[size];
       return (Alloc*)ptr;
   }
@@ -283,11 +276,13 @@ namespace util{
     return std::string(this->asCstr());
   }
 
+  /*
   DEFAULT_TEMPLATE_STRING
   std::istringstream String<_String, Alloc>::makeStream(){
     return std::istringstream(this->asStdStr());
   }
-  
+  */
+
   template<typename _Link>
   Node<_Link>::Node(){
     prev = nullptr;

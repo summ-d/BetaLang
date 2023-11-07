@@ -21,6 +21,7 @@
             Children childNum;
         } toktype_t;
 
+
         class TokenScraper{
             std::ifstream file;
             util::LinkedList<util::Str> lines;
@@ -40,6 +41,9 @@
         typedef struct Token{
             toktype_t tokenType;
             util::Str token;
+            constexpr bool operator==(Token& other){
+                return util::strcmp(other.token.asCstr(), this->token.asCstr());
+            }
         } token_t;
 
         typedef util::LinkedList<Token> TokenList;

@@ -1,7 +1,8 @@
 #ifndef collections_hpp
 #define collections_hpp
 
-#include "specialptr.hpp"
+#include "special/specialptr.hpp"
+#include "special/smartarray.hpp"
 #include <fstream>
 #include <string>
 #include <stdarg.h>
@@ -50,36 +51,6 @@ inline bool strcmp(const char *s1, const char *s2) {
 }
 
 
-
-template<typename T> concept is_number = std::is_arithmetic<T>::value;
-/*
-  @brief Gets the number of digits in a number
-  @param n the number to check
-  @return `int`
-*/
-template<is_number Num>
-inline int getDigits(Num n){
-  int digits = 0;
-  Num num = n;
-  do{
-    num /= 10;
-    digits++;
-  } while (num != 0);
-  
-}
-
-  /*
-    @brief Gets the size of a string
-    @param str the string to check
-    @return `int`
-  */
-  int getSize(const char* str){
-    const char* s;
-    for(s = str; *s; ++s);
-    return(s - str);
-  }
-
-
   /*
     @class The default alllocator for the 
     `String<_String, Alloc>` and the `LinkedList<_Link, Alloc`
@@ -102,6 +73,7 @@ public:
 };
 
 
+/*
 template<typename Alloc = Allocator<char>>
 inline void strcpy(Alloc& a, char* src, char* dest){
   dest = a.allocate(getSize(src));
@@ -110,6 +82,7 @@ inline void strcpy(Alloc& a, char* src, char* dest){
   }
   return;
 }
+*/
 
 /*
   
@@ -183,12 +156,6 @@ class String{
     return (s - str);
   }
 
-  inline int getArrSize(int *arr){
-    const int *a
-    for(a = arr; *a; ++a);
-    return(a - arr);
-  }
-
 public:
   String();
 
@@ -207,8 +174,8 @@ public:
     return count;
   }
 
-  constexpr friend bool operator==(const String<_String *> &s1,
-                                   const String<_String *> &s2) {
+  constexpr friend bool operator==( String<_String *> &s1,
+                                    String<_String *> &s2) {
     return strcmp(s1.asCstr(), s2.asCstr());
   }
 
@@ -235,13 +202,13 @@ public:
 
   bool isEmpty(){ return this->str[0] == '\0'; }
   
-  friend std::ostream& operator<<(std::ostream& o, const String<_String>& s){
-    o << s.asCstr();
+  friend std::ostream& operator<<(std::ostream& o, String<_String>& s){
+    o << (char*)s.asCstr();
     return o;
   }
   friend std::istream& operator>>(std::istream& i, const String<_String>& s){
     const char* s2;
-    i >> s2;
+    i >> (char*)s2;
     for(int j = 0; j < getSize(s2); j++){
       s[j] = s2[j];
     }
@@ -251,108 +218,10 @@ public:
   String<_String>& operator+(kPtr_type& str) noexcept;
   void operator+=(ptr_type& str) noexcept;
 
-
-  // Documentation Time!!! This has become so F****ng complex that
-  // I dont even know what the hell is going on here
-  template<typename ...Args>
-  void format(kPtr_type str, Args&& ...args){ // takes in the string and formatting arguments
-    strcpy(allocator, str, this->str);
-    int* arr = this->findAll("%s"); // finds the instances of the markers
-    int* arr2 = this->findAll("%n");
-    // First error handling, checks if either is a nullptr and gets the size
-    // if either aren't
-    if(arr != nullptr || arr2 != nullptr){
-      int arrSize1 = getArrSize(arr);
-      int arrSize2 = getArrSize(arr2);
-    }
-    // gets the sizeof the args and checks if its equal
-    if(sizeof...(args) != (arrSize1 + arrSize2)){
-      FormatError e;
-      e.line = __LINE__;
-      e.message = "The amount of arguments does not match";
-      throw e;
-      return;
-    }
-    // just declaring more local shit
-    int countN = 0;
-    int countS = 0;
-    for(int i = 0; i < sizeof...(args); i++){
-      // special shit for numbers
-      if(std::is_arithmetic<args[i]>::value){
-        int digits = getDigits(args[i]);
-        // buncha allocator shit
-        ptr_type new_str = allocator.allocNum((this->size + digits) - 2);
-        for(int i = 0; i < (this->size + digits) - 2; i++){
-          new_str[i] = this->str[i];
-          if(arr2[countN] == i){
-            // what the f**k
-            new_str[i] = std::to_string(args[i]).c_str()[i - arr2[countN]];
-            // incrementing the counter
-            countN++;
-          }
-        }
-        // basically a strcpy function inline
-        strcpy(allocator, new_str, this->str);
-      }
-      if(std::is_same<args[i], std::string>::value){
-        // More Allocations
-        ptr_type s = allocator.allocNum(args[i].length());
-        strcpy(allocator, args[i].data(), s);
-        ptr_type new_str = allocator.allocNum((getSize(this->str) + args[i].length()) - 2);
-        for(int i = 0; i < (getSize(this->str) + args[i].length()) - 2; i++){
-          new_str[i] = this->str[i];
-          if(arr[countS] == i){
-            // modifed strcpy basically
-            new_str[i] = s[i - arr[countS]];
-            countS++;
-          }
-        }
-        strcpy(allocator, new_str, this->str);
-      }
-      if(std::is_same<args[i], String<_String>>::value){
-        ptr_type s = allocator.allocNum(args[i].getSize());
-        strcpy(allocator, args[i].asStdStr().data(), s);
-        ptr_type new_str = allocator.allocNum((getSize(this->str) + args[i].getSize()) - 2);
-        for(int i = 0; i < (getSize(this->str) + args[i].getSize()) - 2; i++){
-          new_str[i] = this->str[i];
-          if(arr[countS] == i){
-            new_str[i] = s[i - arr[countS]];
-            countS++;
-          }
-        }
-        strcpy(allocator, new_str, this->str);
-      }
-      if(std::is_same<args[i], const char*>::value){
-        ptr_type s = allocator.allocNum(getSize(args[i]));
-        strcpy(allocator, args[i], s);
-        ptr_type new_str = allocator.allocNum((getSize(args[i]) + getSize(this->str)) - 2);
-        for(int i = 0; i < (getSize(this->str) + getSize(args[i])) - 2; i++){
-          new_str[i] = this->str[i];
-          if(arr[countS] == i){
-            new_str[i] = s[i - arr[countS]];
-            countS++;
-          }
-        }
-        strcpy(allocator, new_str, this->str);
-      }
-    }
-  }
-
-  template<typename ...Args>
-  void format(Args&& ...args){ // takes in just args
-    // why reinvent the wheel when you have a perfectly good function
-    // already? 
-    try{
-    this->format((kPtr_type)this->str, args);
-    } catch(FormatError e){
-      throw e;
-    }
-  }
-
   std::string asStdStr();
   SmartPointer<std::ifstream> getline(std::ifstream& file, char delim = '\n');
   
-  std::istringstream makeStream();
+  //std::istringstream makeStream();
 
 };
 
@@ -449,7 +318,6 @@ class LinkedList{
   void operator+=(const LinkedList<_Link>& ll) noexcept;
   void forEach(Consumer<node_type> c);
 
-  
 };
 
 

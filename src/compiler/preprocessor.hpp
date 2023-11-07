@@ -3,7 +3,7 @@
 
 #include "util/abstractsyntax.hpp"
 #include "util/collections/collections.hpp"
-#include "util/collections/specialptr.hpp"
+#include "util/collections/special/specialptr.hpp"
 #include <fstream>
 
 namespace beta::preproc {
