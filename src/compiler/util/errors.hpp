@@ -6,6 +6,7 @@
     #include <iostream>
 
     namespace beta::err{
+        
         struct BaseError{
             util::string message;
             int line;
