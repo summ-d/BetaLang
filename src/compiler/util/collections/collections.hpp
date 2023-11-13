@@ -35,6 +35,9 @@ typedef unsigned char u8;
 */
 #define DEF_NODE template<typename _Link>
   
+
+#define DEFAULT_TEMPLATE_MAP template<typename ArOne, typename ArTwo, typename AllocArOne, typename AllocArTwo>
+
 /*
   @brief Comparing 2 strings
   @param s1 The first String
@@ -83,6 +86,13 @@ inline void strcpy(Alloc& a, char* src, char* dest){
   return;
 }
 */
+
+template<typename Data, typename Alloc = Allocator<Data>>
+void memcpy(Alloc& a, Data* src, Data* dest, int size, int offset = 0);
+
+template<typename Data, typename Alloc = Allocator<Data>>
+void memcpy_basedOnSrc(Alloc& a, Data* src, Data* dest, int src_size, int offset = 0);
+
 
 /*
   
@@ -156,6 +166,8 @@ class String{
     return (s - str);
   }
 
+  int pLastPos;
+
 public:
   String();
 
@@ -223,6 +235,8 @@ public:
   
   //std::istringstream makeStream();
 
+  int lastPos();
+
 };
 
 typedef String<char> Str;
@@ -253,6 +267,9 @@ struct Node{
   Node(_Link data, SmartPointer<Node<_Link>> prev, SmartPointer<Node> next);
   Node(Node<_Link>& n);
   Node(Node<_Link>&& n);
+  bool isLast(){
+    return next.get()->next == nullptr;
+  }
 };
 
 
@@ -304,6 +321,13 @@ class LinkedList{
   _Link getBack();
   _Link getAt(int pos);
 
+  SmartPointer<Node> nodeAt(int pos);
+
+  bool isLast(Node* node){
+    return node->next->next == nullptr;
+  }
+
+  SmartArray<int> find(_Link data);
 
   void deleteFirst();
   void deleteLast();
@@ -319,6 +343,89 @@ class LinkedList{
   void forEach(Consumer<node_type> c);
 
 };
+
+typedef LinkedList<int> intlist;
+typedef LinkedList<util::string> stringlist;
+typedef LinkedList<float> floatlist;
+
+LinkedList<util::string> parse(util::string str, char delim = ' ');
+
+template<typename ConsumeeOne, typename ConsumeeTwo> class ConsumerTwo{
+
+  std::function<void(ConsumeeOne, ConsumeeTwo)> mFunction;
+
+  public:
+
+  template<class EaterOne, class EaterTwo>
+  ConsumerTwo<ConsumeeOne, ConsumeeTwo>(EaterOne eatOne, EaterTwo eatTwo): mFunction(eatOne, eatTwo){};
+
+  void accept(ConsumeeOne consumeOne, ConsumeeTwo consumeTwo){
+    mFunction(consumeOne, consumeTwo);
+  }
+
+
+};
+
+
+template<typename ArOne, typename ArTwo, typename AllocArOne = Allocator<ArOne>, typename AllocArTwo = Allocator<ArTwo>>
+class RelationalMap{
+  
+  ArOne* oneUnder;
+  ArTwo* twoUnder;
+
+  using tOne = ArOne*;
+  using tTwo = ArTwo*;
+
+  AllocArOne allocatorOne;
+  AllocArTwo allocatorTwo;
+
+  size_t pSize = this->size();
+
+  public:
+  
+  struct RelationalData{
+    ArOne dataOne;
+    ArTwo dataTwo;
+  };
+
+  union Data{
+    ArOne dataOne;
+    ArTwo dataTwo;
+  };
+  
+  RelationalMap();
+  RelationalMap(int size);
+  RelationalMap(ArOne data, ArTwo d);
+  RelationalMap(RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>& rm);
+  RelationalMap(RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>&& rm);
+ 
+  void push(ArOne data, ArTwo d);
+  void append(ArOne data, ArTwo d);
+  void insert(void* (function)(ArOne)(ArTwo)(int),  ArOne data, ArTwo d, int pos);
+  
+  RelationalData get(int index);
+  RelationalData get(RelationalData* (function));
+
+  void before(ArOne d, ArTwo dat, int pos);
+  void after(ArOne d, ArTwo dat, int pos);
+
+  void forEach(ConsumerTwo<ArOne, ArTwo> c);
+  size_t size();
+
+  RelationalData& operator[](int& i);
+
+  // TODO: Convert this to a valid thing (Add argument)
+  void operator+=(RelationalMap<ArOne, ArTwo>& rm);
+  Data& operator()(int& idOne, int& idTwo);
+
+  RelationalData front();
+  RelationalData back();
+
+  //bool isEmpty();
+
+};
+
+
 
 
 

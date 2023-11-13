@@ -18,6 +18,20 @@ namespace util{
     delete a;
   }
 
+  template<typename Data, typename Alloc>
+  void memcpy(Alloc& a, Data* src, Data* dest, int size, int offset){
+    dest = a.allocate(size + offset);
+    for(int i = offset; i < size + offset; i++){
+      dest[i] = src[i - offset];
+    }
+    return;
+  }
+
+  template<typename Data, typename Alloc>
+  void memcpy_basedOnSrc(Alloc& a, Data* src, Data* dest, int src_size, int offset){
+    for(int i = offset; i < src_size + offset; i++) dest[i] = src[i];
+  }
+
   template<typename Alloc>
   typename Allocator<Alloc>::ptr_type Allocator<Alloc>::address(ref_type ref){
       return &ref;
@@ -137,9 +151,11 @@ namespace util{
           return String<_String>(delim);
         } else{
           ptr_type str = allocator.allocNum(arr[i] - i);
-          for (int j = indStart; j < arr[i]; j++){
+          int j;
+          for (j = indStart; j < arr[i]; j++){
             str[j - indStart] = this->str[j]; 
           }
+          this->pLastPos = j;
           String<_String> ret(str);
           return ret;
         }
@@ -276,6 +292,11 @@ namespace util{
     return std::string(this->asCstr());
   }
 
+  DEFAULT_TEMPLATE_STRING 
+  int String<_String, Alloc>::lastPos(){
+    return this->pLastPos;
+  }
+
   /*
   DEFAULT_TEMPLATE_STRING
   std::istringstream String<_String, Alloc>::makeStream(){
@@ -385,6 +406,19 @@ namespace util{
   }
 
   DEFAULT_TEMPLATE_LIST
+  SmartArray<int> LinkedList<_Link, Alloc>::find(_Link data){
+      SmartArray<int> arr();
+      int count = 0;
+      for(int i = 0; i < this->size; i++){
+        if(data == this[i]){
+            arr[count]= i; 
+            count++;
+        }
+      }
+      return arr;
+  }
+
+  DEFAULT_TEMPLATE_LIST
   void LinkedList<_Link, Alloc>::deleteFirst(){
     SmartPointer<node_type> head_ref = head;
     head_ref.deletePtr();
@@ -460,5 +494,230 @@ namespace util{
       c.accept(this[i]);
     }
   }
+
+  DEFAULT_TEMPLATE_LIST
+  SmartPointer<Node> LinkedList<_Link, Alloc>::nodeAt(int pos){
+    SmartPointer<Node> temp = head;
+    int count = 0;
+    while(temp != nullptr && count < pos){
+      temp = temp->next;
+      count++;
+    }
+    return temp;
+  }
   
+  LinkedList<util::string> parse(util::string str, char delim){
+      util::string sub = str.substr(0, delim);
+      util::stringlist ret;
+      ret.append(sub);
+      for(int i = sub.getSize(); i < str.size(); i+= sub.getSize()){
+        sub = str.substr(i, delim);
+        ret.append(sub);
+      }
+      return ret;
+  }  
+
+  void operator+=(RelationalMap<ArOne, ArTwo> &rm){
+    tOne tempOne = this->allocatorOne.allocate(this->pSize + rm.pSize);
+    tTwo tempTwo = this->allocatorTwo.allocate(this->pSize + rm.pSize);
+
+    memcpy_basedOnSrc(allocatorOne, this->oneUnder, tempOne, this->pSize);
+    memcpy_basedOnsrc(allocatorTwo, this->twoUnder, tempTwo, this->psize);
+
+    memcpy_basedOnSrc(allocatorOne, this->oneUnder, rm.oneUnder, rm.pSize, this->pSize);
+    memcpy_basedOnSrc(allocatorOne, this->twoUnder, rm.twoUnder, rm.pSize, this->pSize);
+
+    this->pSize += rm.pSize;
+
+    memcpy(allocatorOne, tempOne, this->oneUnder, this->pSize);
+    memcpy(allocatorTwo, tempTwo, this->twoUnder, this->pSize);
+  }
+
+  template<typename ArOne, typename ArTwo, typename AllocArOne, typename AllocArTwo>
+  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalMap(){
+    this->oneUnder = this->allocatorOne.allocate(sizeof(ArOne));
+    this->twoUnder = this->allocatorTwo.allocate(sizeof(ArTwo));
+    this->pSize = 0;
+  }
+
+  template<typename ArOne, typename ArTwo, typename AllocArOne, typename AllocArTwo>
+  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalMap(int size){
+      this->oneUnder = this->allocatorOne.allocate(sizeof(ArOne) * size);
+      this->twoUnder = this->allocatorTwo.allocate(sizeof(ArTwo) * size);
+      this->pSize = size;
+  }
+
+  template<typename ArOne, typename ArTwo, typename AllocArOne, typename AllocArTwo>
+  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalMap(ArOne data, ArTwo d){
+    this->oneUnder = this->allocatorOne.allocate(sizeof(ArOne));
+    this->twoUnder = this->allocatorTwo.allocate(sizeof(ArOne));
+
+    this->oneUnder[0] = data;
+    this->twoUnder[0] = d; 
+    this->pSize = 1;
+  }  
+
+  template<typename ArOne, typename ArTwo, typename AllocArOne, typename AllocArTwo>
+  RelationalMap<ArOne, ArTwom AllocArOne, AllocArTwo>::RelationalMap(RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>& rm){
+    this->oneUnder = this->allocatorOne.allocate(sizeof(ArOne)* rm.size());
+    this->twoUnder = this->allocatorTwo.allocate(sizeof(ArTwo) *rm.size());
+    for(int i = 0; i < rm.size(); i++){
+      oneUnder[i] = rm(i, 0);
+      oneUnder[i] = rm(i, 1);  
+    }
+    this->pSize = rm.size();
+  }
+
+  template<typename ArOne, typename ArTwo, typename AllocArOne, typename AllocArTwo>
+  RelationalMap<ArOne, ArTwom AllocArOne, AllocArTwo>::RelationalMap(RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>&& rm){
+    this->oneUnder = this->allocatorOne.allocate(sizeof(ArOne)* rm.size());
+    this->twoUnder = this->allocatorTwo.allocate(sizeof(ArTwo) *rm.size());
+    for(int i = 0; i < rm.size(); i++){
+      oneUnder[i] = rm(i, 0);
+      oneUnder[i] = rm(i, 1);  
+    }
+    this->pSize = rm.size();
+  }
+
+
+  DEFAULT_TEMPLATE_MAP
+  void RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::push(ArOne data, ArTwo d){
+    ArOne* tempOne = this->allocatorOne.allocate(this->pSize + 1);
+    ArTwo* tempTwo = this->allocatorOne.allocate(this->pSize + 1);
+    tempOne[0] = data;
+    tempTwo[0] = d;
+    memcpy(this->allocatorOne, tempOne, this->oneUnder, this->pSize, 1);
+    memcpy(this->allocatorTwo, tempTwo, this->twoUnder, this->pSize, 1);
+    this->pSize += 1;
+  }
+  
+  DEFAULT_TEMPLATE_MAP
+  void RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::append(ArOne data, ArTwo d){
+    ArOne* tempOne = this->allocatorOne.allocate(this->pSize + 1);
+    ArOne* tempTwo = this->allocatorTwo.allocate(this->pSize + 1);
+
+    memcpy(this->allocatorOne, this->oneUnder, tempOne, this-pSize + 1);
+    memcpy(this->allocatorTwo, this->twoUnder, tempTwo, this->pSize + 1);
+
+    tempOne[this->pSize] = data;
+    tempTwo[this->pSize] = d;
+
+    this->pSize += 1;
+
+    memcpy(this->allocatorOne, tempOne, this->oneUnder, this->pSize);
+    memcpy(this->allocatorTwo, tempTwo, this->twoUnder, this->pSize);
+
+    return;    
+
+  }
+
+  DEFAULT_TEMPLATE_MAP
+  void RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::insert(void* (function)(ArOne)(ArTwo)(int), ArOne data, ArTwo d, int pos){
+      function(data, d, pos);
+      this->pSize += 1;
+      return;
+  }
+
+  DEFAULT_TEMPLATE_MAP
+  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalData RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::get(int index){
+    RelationalData rd;
+    if(index < size){
+      rd.dataOne = oneUnder[index];
+      rd.dataTwo = oneUnder[index];
+    }
+    return rd;
+  }
+
+  DEFAULT_TEMPLATE_MAP
+  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalData RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::get(RelationalData* (function)){
+    return function();
+  }
+
+  DEFAULT_TEMPLATE_MAP
+  void RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::before(ArOne d, ArTwo dat, int pos){
+    tOne tempOne = this->allocatorOne.allocate(this->pSize + 1);
+    tTwo tempTwo = this->allocatorTwo.allocate(this->pSize + 1);
+
+    for(int i = 0; i < this->pSize + 1; i++){
+      tempOne[i] = this->underOne[i];
+      tempTwo[i] = this->underTwo[i];
+      if(i == pos - 1){
+        tempOne[i] = d;
+        tempTwo[i] = dat;
+      }
+    }
+
+    memcpy(allocatorOne, tempOne, underOne, this->pSize + 1);
+    memcpy(allocatorTwo, tempTwo, underTwo, this->pSize + 1);
+
+    return;
+  }
+
+
+  DEFAULT_TEMPLATE_MAP
+  void RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::after(ArOne d, ArTwo dat, int pos){
+    tOne tempOne = this->allocatorOne.allocate(this->pSize + 1);
+    tTwo tempTwo = this->allocatorTwo.allocate(this->pSize + 1);
+
+    for(int i = 0; i < this->pSize + 1; i++){
+      tempOne[i] = this->underOne[i];
+      tempTwo[i] = this->underTwo[i];
+      if(i == pos + 1){
+        tempOne[i] = d;
+        tempTwo[i] = dat;
+      }
+    }
+
+    memcpy(allocatorOne, tempOne, underOne, this->pSize + 1);
+    memcpy(allocatorTwo, tempTwo, underTwo, this->pSize + 1);
+
+    return;
+  }
+
+  DEFAULT_TEMPLATE_MAP
+  void RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::forEach(ConsumerTwo<ArOne, ArTwo> c){
+    for(int i = 0; i < this->pSize; i++){
+      c.accept(this->oneUnder[i], this->twoUnder[i]);
+    }
+  }
+
+  DEFAULT_TEMPLATE_MAP
+  size_t RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::size(){
+    return this->pSize;
+  }
+
+  DEFAULT_TEMPLATE_MAP
+  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalData& RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::operator[](int &i){
+    return this->get(i);
+  }
+
+
+  DEFAULT_TEMPLATE_MAP
+  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::Data& RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::operator()(int& idOne, int &idTwo){
+    Data d;
+    switch(indTwo){
+      case 0:
+        d.dataOne = this[indOne].dataOne;
+        break;
+      case 1:
+        d.dataTwo = this[indOne].dataTwo;
+        break;
+      default:
+        break;
+    }
+    return d;
+  }
+
+  DEFAULT_TEMPLATE_MAP
+  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalData RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::front(){
+    return this->get(0);
+  }
+
+  DEFAULT_TEMPLATE_MAP
+  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalData RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::back(){
+    return this->get(this->pSize - 1);
+  }
+
+
+
 }

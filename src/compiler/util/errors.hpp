@@ -17,15 +17,15 @@
         };
 
         class Logger{
-            static util::LinkedList<BaseError&> errors;
+            static util::LinkedList<BaseError*> errors;
 
             public:
-            static void log(BaseError &e){
+            static void log(BaseError* e){
                 errors.append(e);
             }
 
             static void printTrace(){
-                errors.forEach([](BaseError &e){
+                errors.forEach([](BaseError* &e){
                     std::cout << e;
                 });
             }

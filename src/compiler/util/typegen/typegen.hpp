@@ -11,9 +11,12 @@ namespace util{
     enum PossibleArch{
         ARM,
         AVR,
-        X86_32,
+        X86,
         X86_64,
-        JVM
+        JVM,
+        MIPS,
+        RISC,
+        ERROR = -1
     };
 
 }
