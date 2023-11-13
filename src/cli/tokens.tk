@@ -1,0 +1,11 @@
+beta <filename>
+beta <filename> -o <outname>
+beta -p <filename>
+beta <filename> -p <outname>
+beta -S <filename>
+beta <filename> -S <outname>
+beta --version
+beta -v
+beta --add <packagename>
+beta init <dirname>
+beta config

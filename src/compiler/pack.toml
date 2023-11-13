@@ -1,0 +1,12 @@
+[meta]
+    name = "my_packagename"
+    version = "0.1.0"
+    authors = ["Jack Summers", "etc..."]
+    subpkg = ["path/to/subpackage1", "path/to/subpackage2"]
+
+[config]
+    defaultArch = "JRE"
+    outDir = "path/to/output/directory"
+
+[deps]
+    cowsay = "0.1.0"
