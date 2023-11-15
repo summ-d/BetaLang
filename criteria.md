@@ -42,7 +42,7 @@ Solutions:
 
         defun main(args: String[]) => Void{
           intList.add(5);
-          Integer i = intList.get(0);
+          let i: Integer = intList.get(0);
         }
         
         
@@ -65,8 +65,10 @@ Solutions:
   Then in main.blp\
   
               
-                external "path/to/somefile.cpp" comp Bar;
-                Bar b = new Bar;
+                external "path/to/somefile.cpp"{ comp Bar;}
+                let b: Bar = new Bar;
+                b.foo = 0;
+                b.baz = "Hello";
               
 
 

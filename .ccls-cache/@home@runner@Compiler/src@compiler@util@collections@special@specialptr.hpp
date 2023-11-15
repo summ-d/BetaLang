@@ -34,9 +34,8 @@
       return new SmartPointer<Pointer>(pointer);
     }
 
-    constexpr friend bool operator==(const SmartPointer<Pointer>& p1, const SmartPointer<Pointer>& p2);
-    constexpr bool operator==(std::nullptr_t np){
-      return this->ptr = np;
+    constexpr bool operator==(SmartPointer<Pointer>& other){
+      return this->ptr = other.get();
     }
 
     Pointer* get(){
@@ -49,11 +48,6 @@
     }
     
   };
-
-  template<typename Pointer>
-  constexpr bool util::operator==(const SmartPointer<Pointer>& p1, const SmartPointer<Pointer>& p2) {
-    return p1.ptr == p2.ptr;
-  }
 
   }
 

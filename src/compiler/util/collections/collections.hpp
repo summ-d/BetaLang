@@ -8,6 +8,7 @@
 #include <stdarg.h>
 #include <functional>
 #include <type_traits>
+#include <any>
 
 namespace util {
 typedef unsigned long size_t;
@@ -177,8 +178,9 @@ public:
 
   String(String<type>&& str);
 
-  inline const char *asCstr() { return (const char *)this->str; }
-
+  inline const char *asCstr() const { return (const char *)this->str; }
+  inline const char *asCStr() { return  (const char*) this->str;}
+  
   inline size_t getSize() {
     int count = 0;
     for (int count = 0; str[count] != '\0'; ++count)
@@ -218,14 +220,6 @@ public:
     o << (char*)s.asCstr();
     return o;
   }
-  friend std::istream& operator>>(std::istream& i, const String<_String>& s){
-    const char* s2;
-    i >> (char*)s2;
-    for(int j = 0; j < getSize(s2); j++){
-      s[j] = s2[j];
-    }
-    return i;
-  }
 
   String<_String>& operator+(kPtr_type& str) noexcept;
   void operator+=(ptr_type& str) noexcept;
@@ -241,20 +235,6 @@ public:
 
 typedef String<char> Str;
 typedef Str string;
-
-template<typename Consumee>
-class Consumer{
-  std::function<void(Consumee)> pConsume;
-
-  public:
-  template<class Eater> 
-  Consumer<Consumee>(Eater consume): pConsume(consume){};
-
-  void accept(Consumee c){
-    pConsume(c);
-  }
-
-};
 
 #undef DEF_NODE
 
@@ -321,9 +301,9 @@ class LinkedList{
   _Link getBack();
   _Link getAt(int pos);
 
-  SmartPointer<Node> nodeAt(int pos);
+  SmartPointer<Node<_Link>> nodeAt(int pos);
 
-  bool isLast(Node* node){
+  bool isLast(Node<_Link>* node){
     return node->next->next == nullptr;
   }
 
@@ -340,7 +320,7 @@ class LinkedList{
   _Link operator[](const int& i);
   LinkedList<_Link>& operator=(const LinkedList<_Link>& ll) noexcept;
   void operator+=(const LinkedList<_Link>& ll) noexcept;
-  void forEach(Consumer<node_type> c);
+  void forEach(std::function<void(_Link)> c);
 
 };
 
@@ -349,22 +329,6 @@ typedef LinkedList<util::string> stringlist;
 typedef LinkedList<float> floatlist;
 
 LinkedList<util::string> parse(util::string str, char delim = ' ');
-
-template<typename ConsumeeOne, typename ConsumeeTwo> class ConsumerTwo{
-
-  std::function<void(ConsumeeOne, ConsumeeTwo)> mFunction;
-
-  public:
-
-  template<class EaterOne, class EaterTwo>
-  ConsumerTwo<ConsumeeOne, ConsumeeTwo>(EaterOne eatOne, EaterTwo eatTwo): mFunction(eatOne, eatTwo){};
-
-  void accept(ConsumeeOne consumeOne, ConsumeeTwo consumeTwo){
-    mFunction(consumeOne, consumeTwo);
-  }
-
-
-};
 
 
 template<typename ArOne, typename ArTwo, typename AllocArOne = Allocator<ArOne>, typename AllocArTwo = Allocator<ArTwo>>
@@ -401,7 +365,6 @@ class RelationalMap{
  
   void push(ArOne data, ArTwo d);
   void append(ArOne data, ArTwo d);
-  void insert(void* (function)(ArOne)(ArTwo)(int),  ArOne data, ArTwo d, int pos);
   
   RelationalData get(int index);
   RelationalData get(RelationalData* (function));
@@ -409,10 +372,14 @@ class RelationalMap{
   void before(ArOne d, ArTwo dat, int pos);
   void after(ArOne d, ArTwo dat, int pos);
 
-  void forEach(ConsumerTwo<ArOne, ArTwo> c);
+  ArOne* rawOne(){ return this->oneUnder;}
+  ArTwo* rawTwo(){ return this->twoUnder;}
+  
+  void forEach(std::function<void(ArOne, ArTwo)> c);
   size_t size();
 
   RelationalData& operator[](int& i);
+  void operator=(RelationalMap<ArOne, ArTwo> rm);
 
   // TODO: Convert this to a valid thing (Add argument)
   void operator+=(RelationalMap<ArOne, ArTwo>& rm);
@@ -421,11 +388,9 @@ class RelationalMap{
   RelationalData front();
   RelationalData back();
 
-  //bool isEmpty();
+  bool isEmpty();
 
 };
-
-
 
 
 

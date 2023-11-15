@@ -148,7 +148,7 @@ namespace util{
         if(arr[i] < indStart){
           i++;
         } else if (arr[i] == indStart){
-          return String<_String>(delim);
+          return String<_String>(&delim);
         } else{
           ptr_type str = allocator.allocNum(arr[i] - i);
           int j;
@@ -161,6 +161,7 @@ namespace util{
         }
       }
     }
+    return String<_String>();
   }
 
   DEFAULT_TEMPLATE_STRING
@@ -238,7 +239,7 @@ namespace util{
 
   DEFAULT_TEMPLATE_STRING 
   void String<_String, Alloc>::operator=(const String<_String>& c){
-    this->str = c.asCstr();
+    this->str = (char*)c.asCstr();
   }
 
 
@@ -378,7 +379,7 @@ namespace util{
 
   DEFAULT_TEMPLATE_LIST
   void LinkedList<_Link, Alloc>::append(_Link data){
-    SmartPointer<node_type> new_node = new node_type(data, tail->prev, tail);
+    SmartPointer<node_type> new_node(new node_type(data, tail->prev, tail));
     tail->prev->next = new_node;
     tail->prev = new_node;
     return;
@@ -407,7 +408,7 @@ namespace util{
 
   DEFAULT_TEMPLATE_LIST
   SmartArray<int> LinkedList<_Link, Alloc>::find(_Link data){
-      SmartArray<int> arr();
+      SmartArray<int> arr;
       int count = 0;
       for(int i = 0; i < this->size; i++){
         if(data == this[i]){
@@ -453,7 +454,7 @@ namespace util{
   size_t LinkedList<_Link, Alloc>::getSize(){
     SmartPointer<Node<_Link>> temp = head;
     int count = 0;
-    while(temp != nullptr){
+    while(temp.get() != nullptr){
       temp = temp->next;
       count++;
     }
@@ -489,15 +490,15 @@ namespace util{
   }
 
   DEFAULT_TEMPLATE_LIST
-  void LinkedList<_Link, Alloc>::forEach(Consumer<node_type> c){
+  void LinkedList<_Link, Alloc>::forEach(std::function<void(_Link)> c){
     for(int i = 0; i < this->size; i++){
-      c.accept(this[i]);
+      c(this[i]);
     }
   }
 
   DEFAULT_TEMPLATE_LIST
-  SmartPointer<Node> LinkedList<_Link, Alloc>::nodeAt(int pos){
-    SmartPointer<Node> temp = head;
+  SmartPointer<Node<_Link>> LinkedList<_Link, Alloc>::nodeAt(int pos){
+    SmartPointer<Node<_Link>> temp = head;
     int count = 0;
     while(temp != nullptr && count < pos){
       temp = temp->next;
@@ -510,14 +511,15 @@ namespace util{
       util::string sub = str.substr(0, delim);
       util::stringlist ret;
       ret.append(sub);
-      for(int i = sub.getSize(); i < str.size(); i+= sub.getSize()){
+      for(int i = sub.getSize(); i < str.getSize(); i+= sub.getSize()){
         sub = str.substr(i, delim);
         ret.append(sub);
       }
       return ret;
   }  
-
-  void operator+=(RelationalMap<ArOne, ArTwo> &rm){
+  
+  DEFAULT_TEMPLATE_MAP
+  void RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::operator+=(RelationalMap<ArOne, ArTwo> &rm){
     tOne tempOne = this->allocatorOne.allocate(this->pSize + rm.pSize);
     tTwo tempTwo = this->allocatorTwo.allocate(this->pSize + rm.pSize);
 
@@ -558,7 +560,7 @@ namespace util{
   }  
 
   template<typename ArOne, typename ArTwo, typename AllocArOne, typename AllocArTwo>
-  RelationalMap<ArOne, ArTwom AllocArOne, AllocArTwo>::RelationalMap(RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>& rm){
+  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalMap(RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>& rm){
     this->oneUnder = this->allocatorOne.allocate(sizeof(ArOne)* rm.size());
     this->twoUnder = this->allocatorTwo.allocate(sizeof(ArTwo) *rm.size());
     for(int i = 0; i < rm.size(); i++){
@@ -569,7 +571,7 @@ namespace util{
   }
 
   template<typename ArOne, typename ArTwo, typename AllocArOne, typename AllocArTwo>
-  RelationalMap<ArOne, ArTwom AllocArOne, AllocArTwo>::RelationalMap(RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>&& rm){
+  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalMap(RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>&& rm){
     this->oneUnder = this->allocatorOne.allocate(sizeof(ArOne)* rm.size());
     this->twoUnder = this->allocatorTwo.allocate(sizeof(ArTwo) *rm.size());
     for(int i = 0; i < rm.size(); i++){
@@ -612,16 +614,9 @@ namespace util{
   }
 
   DEFAULT_TEMPLATE_MAP
-  void RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::insert(void* (function)(ArOne)(ArTwo)(int), ArOne data, ArTwo d, int pos){
-      function(data, d, pos);
-      this->pSize += 1;
-      return;
-  }
-
-  DEFAULT_TEMPLATE_MAP
-  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalData RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::get(int index){
+  typename RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalData RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::get(int index){
     RelationalData rd;
-    if(index < size){
+    if(index < this->size){
       rd.dataOne = oneUnder[index];
       rd.dataTwo = oneUnder[index];
     }
@@ -629,7 +624,7 @@ namespace util{
   }
 
   DEFAULT_TEMPLATE_MAP
-  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalData RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::get(RelationalData* (function)){
+  typename RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalData RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::get(RelationalData* (function)){
     return function();
   }
 
@@ -647,9 +642,11 @@ namespace util{
       }
     }
 
-    memcpy(allocatorOne, tempOne, underOne, this->pSize + 1);
-    memcpy(allocatorTwo, tempTwo, underTwo, this->pSize + 1);
+    memcpy(allocatorOne, tempOne, this->underOne, this->pSize + 1);
+    memcpy(allocatorTwo, tempTwo, this->underTwo, this->pSize + 1);
 
+    this->pSize +=1;
+    
     return;
   }
 
@@ -668,16 +665,18 @@ namespace util{
       }
     }
 
-    memcpy(allocatorOne, tempOne, underOne, this->pSize + 1);
-    memcpy(allocatorTwo, tempTwo, underTwo, this->pSize + 1);
+    memcpy(allocatorOne, tempOne, this->underOne, this->pSize + 1);
+    memcpy(allocatorTwo, tempTwo, this->underTwo, this->pSize + 1);
 
+    this->pSize += 1;
+    
     return;
   }
 
   DEFAULT_TEMPLATE_MAP
-  void RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::forEach(ConsumerTwo<ArOne, ArTwo> c){
+  void RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::forEach(std::function<void(ArOne, ArTwo)> c){
     for(int i = 0; i < this->pSize; i++){
-      c.accept(this->oneUnder[i], this->twoUnder[i]);
+      c(this->oneUnder[i], this->twoUnder[i]);
     }
   }
 
@@ -687,20 +686,27 @@ namespace util{
   }
 
   DEFAULT_TEMPLATE_MAP
-  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalData& RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::operator[](int &i){
+  typename RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalData& RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::operator[](int &i){
     return this->get(i);
+  }
+
+  DEFAULT_TEMPLATE_MAP
+  void RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::operator=(RelationalMap<ArOne, ArTwo>& rm){
+    memcpy(this->allocatorOne, rm.rawOne(), this->oneUnder, rm.size());
+    memcpy(this->allocatorOne, rm.rawTwo(), this->twoUnder, rm.size());
+    this->pSize = rm.size();
   }
 
 
   DEFAULT_TEMPLATE_MAP
-  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::Data& RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::operator()(int& idOne, int &idTwo){
+  typename RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::Data& RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::operator()(int& idOne, int &idTwo){
     Data d;
-    switch(indTwo){
+    switch(idTwo){
       case 0:
-        d.dataOne = this[indOne].dataOne;
+        d.dataOne = this[idOne].dataOne;
         break;
       case 1:
-        d.dataTwo = this[indOne].dataTwo;
+        d.dataTwo = this[idOne].dataTwo;
         break;
       default:
         break;
@@ -709,15 +715,19 @@ namespace util{
   }
 
   DEFAULT_TEMPLATE_MAP
-  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalData RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::front(){
+  typename RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalData RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::front(){
     return this->get(0);
   }
 
   DEFAULT_TEMPLATE_MAP
-  RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalData RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::back(){
+  typename RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::RelationalData RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::back(){
     return this->get(this->pSize - 1);
   }
 
+  DEFAULT_TEMPLATE_MAP
+  bool RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::isEmpty(){
+    return this->pSize == 0;
+  }
 
 
 }

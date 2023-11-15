@@ -1,11 +1,31 @@
 #include "preprocessor.hpp"
 
-namespace beta::preproc{
+namespace beta{
+namespace preproc{
 
-    EvalDiscriptor parseExpession(pproc_t existing, util::string expression);
+    EvalDiscriptor parseExpession(pproc_t existing, util::string expression){
+      
+      EvalDiscriptor edis; 
+    }
+
+    bool EvalDiscriptor::evaluate(){
+      this->op = parseOp(this->oper);
+      
+    }
 
     util::RelationalMap<globals::objdis_t, long> parseExternal(util::string external){
         
+    }
+
+    util::RelationalMap<util::string, globals::Type> parseTemplate(util::string args){
+      util::stringlist sl = util::parse(args, '(');  
+      util::RelationalMap<util::string, globals::Type> map;
+      map.append(sl[0], globals::Type::DEFUN);
+      util::stringlist sl2 = util::parse(sl[1], ',');
+      for(int i = 0; i < sl2.getSize(); i++){
+        map.append(sl2[i], globals::getType(util::parse(sl2[i])[1]));
+      }
+      return map;
     }
 
   
@@ -42,7 +62,7 @@ namespace beta::preproc{
                     occurances.append(wrds[i].getAt(j), length);
                     switch(this->parse(wrds[i].getAt(j))){
                         case 0: case 2: case 5:
-                            if(wrds[i].isLast(wrds[i].nodeAt(j))){
+                            if(wrds[i].isLast(wrds[i].nodeAt(j).get())){
                                 expressions.append(wrds[i + 1].getAt(0), wrds[i + 1].getAt(0).getSize() + length);
                                 if(wrds[i + 1].getAt(0)[wrds[i + 1].getAt(0).getSize() - 1] != ';'){
                                     globals::unexerr_t error;
@@ -56,9 +76,9 @@ namespace beta::preproc{
                             }
                             break;
                         case 1: case 7:
-                            if(wrds[i].isLast(wrds[i].nodeAt(j))){
+                            if(wrds[i].isLast(wrds[i].nodeAt(j).get())){
                                 util::string temp = wrds[i + 1].getAt(0);
-                                if(wrds[i + 1].isLast(wrds[i + 1].nodeAt(0))){
+                                if(wrds[i + 1].isLast(wrds[i + 1].nodeAt(0).get())){
                                     temp.concat(wrds[i + 2].getAt(0));
                                     expressions.append(temp, length);
                                     if(temp[temp.getSize() - 1] != ';'){
@@ -75,19 +95,20 @@ namespace beta::preproc{
                                 expressions.append(temp, length + temp.getSize());
                             }
                             break;
-                        case 3: case 6:
+                        case 3: case 6: {
                             int countV = 0;
                             int countH = 0;
                             util::string temp;
-                            while(util::strcmp(wrds[i + countH][j + countV].asCstr(), "@end") != true && !wrds[i + countH].isLast(wrds.nodeAt(countH + i))){
+                            while(util::strcmp(wrds[i + countH][j + countV].asCstr(), "@end") != true && !wrds[i + countH].isLast(wrds[i].nodeAt(countH + i).get())){
                                 temp.concat(wrds[i + countH][j + countV]);
                                 expressions.append(temp, length + temp.getSize());
-                                if(wrds[i].isLast(wrds[i + countH].nodeAt(j + countV))){
+                                if(wrds[i].isLast(wrds[i + countH].nodeAt(j + countV).get())){
                                     countH++;
                                 }
                                 countV++;
                             }
                             break;
+                          }  
                         case 4:
                             break;
                         case 8:
@@ -106,32 +127,34 @@ namespace beta::preproc{
             pproc_t ppt;
             int startCount = 0;
             switch(this->parse(occurances[i].dataOne)){
-                case 0:
+                case 0: {
                     ppt.fullToken = occurances[i].dataOne;
                     ppt.marker = '@';
                     ppt.t = Type::AT_USE;
                     ppt.semi = ';';
-                    udis_t ud = (udis_t)ppt;
+                    udis_t ud = *(udis_t*)&ppt;
                     ud.arch = this->parseArch(expressions[i].dataOne);
                     tokens.append(ud, occurances[i].dataTwo);
                     break;
-                case 1:
+                }
+                case 1:{
                     ppt.fullToken = occurances[i].dataOne;
                     ppt.marker = '@';
                     ppt.t = Type::AT_ALIAS;
                     ppt.semi = ';';
-                    adis_t ad = (adis_t)ppt;
+                    adis_t ad = *(adis_t*)&ppt;
                     ad.type = util::parse(expressions[i].dataOne)[0];
                     ad.alias = util::parse(expressions[i].dataOne)[1];
                     tokens.append(ad, occurances[i].dataTwo);
                     break;
-                case 2:
+                }
+                case 2: {
                     ppt.fullToken = occurances[i].dataOne;
                     gc.startPoint = expressions[i].dataOne;
                     ppt.marker = '@';
                     ppt.t = Type::AT_START;
                     ppt.semi = ';';
-                    sdis_t sd = (sdis_t)ppt;
+                    sdis_t sd = *(sdis_t*)&ppt;
                     sd.startPoint = expressions[i].dataOne;
                     tokens.append(sd, occurances[i].dataTwo);
                     if(startCount > 0){
@@ -139,7 +162,8 @@ namespace beta::preproc{
                     }
                     startCount++;
                     break;
-                case 3:
+                  }
+                case 3: {
                     ppt.fullToken = occurances[i].dataOne;
                     ppt.marker = '@';
                     ppt.t = Type::AT_EVAL;
@@ -147,38 +171,74 @@ namespace beta::preproc{
                     evdis_t edis = parseExpession(ppt, expressions[i].dataOne);
                     tokens.append(edis, occurances[i].dataTwo);
                     break;
-                case 4:
+                }
+                case 4: {
                     ppt.fullToken = occurances[i].dataOne;
                     ppt.marker = '@';
                     ppt.t = Type::AT_END;
                     ppt.semi = ';';
                     tokens.append(ppt, occurances[i].dataTwo);
                     break;
-                case 5:
+                  }
+                case 5: {
                     ppt.fullToken = occurances[i].dataOne;
                     ppt.marker = '@';
                     ppt.t = Type::AT_INCLUDE;
                     ppt.semi = ';';
-                    indis_t id = (indis_t)ppt;
+                    indis_t id = *(indis_t*)&ppt;
                     id.includeFn = occurances[i].dataOne;
                     tokens.append(id, occurances[i].dataTwo);
                     break;
-                case 6:
+                  }    
+                case 6: {
                     ppt.fullToken = occurances[i].dataOne;
                     ppt.marker = '@';
                     ppt.t = Type::AT_EXTERNAL;
                     ppt.semi = ';';
-                    extdis_t exdis = (extdis_t)ppt;
-                    
+                    extdis_t exdis = *(extdis_t*)&ppt;
+                    util::stringlist temp = util::parse(expressions[i].dataOne);
+                    exdis.fileName = temp[0];
+                    exdis.endDirective = temp.getBack();
+                    exdis.startPosition = occurances[i].dataTwo;
+                    exdis.endPosition = expressions[i].dataTwo;
+                    tokens.append(exdis, occurances[i].dataTwo);
                     break;
-                case 7:
+                  }  
+                case 7: {
+                    ppt.fullToken = occurances[i].dataOne;
+                    ppt.marker = '@';
+                    ppt.t = Type::AT_DEFINE;
+                    ppt.semi = ';';
+                    defdis_t defdis = *(defdis_t*)&ppt;
+                    defdis.name = util::parse(expressions[i].dataOne)[0];
+                    defdis.value = util::parse(expressions[i].dataOne)[1];
+                    tokens.append(defdis, occurances[i].dataTwo);
                     break;
-                case 8:
-                    break;
+                  }
+                case 8:{
+                  ppt.fullToken = occurances[i].dataOne;
+                  ppt.marker = occurances[i].dataOne[0];
+                  ppt.t = Type::AT_DEFUN;
+                  ppt.semi = expressions[i].dataOne[expressions[i].dataOne.findFirst(';').unwrap()];
+                  // Dereferecing a cast from a refernce of the paent struct to a pointer of the child struct
+                  atdef_t atdef = *(atdef_t*)&ppt;
+                  atdef.args = util::RelationalMap<util::string, globals::Type> (parseTemplate(util::parse(expressions[i].dataOne, '\n')[0]));
+                  atdef.children = util::RelationalMap<globals::bdis_t, long>(globals::parseBasic(util::parse(expressions[i].dataOne, '\n')));
+                  atdef.colon = expressions[i].dataOne[expressions[i].dataOne.findFirst(':').unwrap()];
+                  atdef.endDir = expressions[i].dataOne.substr(expressions[i].dataOne.findFirst((char*)"@end").unwrap(), 4);
+                  atdef.type = globals::Type::DEFUN;
+                  int ref = expressions[i].dataOne.findAll((char*)"=>")[0];
+                  atdef.retType = globals::getType(expressions[i].dataOne.substr(ref + 2));
+                  tokens.append(atdef, occurances[i].dataTwo);
+                  break;
+                }
                 default: 
                     break;
             }
         }  
     }
 
+    
+  
+  }
 }

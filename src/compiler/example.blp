@@ -3,6 +3,7 @@
 
 import std::Output;
 import lang::Number;
+import lang::String;
 
 @external "Test.java":
     Obj Test;
@@ -14,8 +15,9 @@ import lang::Number;
     defun doSomething(x: Integer) => Void;
 @end;
 
-@defun example(x: Integer) => String:
-    return Number::asString(x);
+@generic<T>
+@defun example(x: T) => String:
+    ret String::asString(x);
 @end;
 
 
@@ -35,5 +37,6 @@ defun Main() => Void {
     let testOne: TestOne = new TestOne();
     testOne.doSomethingElse(4);
     let out: Output => new Output(Output.CONSOLE);
-    global.doSomething(6);
+    doSomething(6);
+    out.println();
 }

@@ -1,12 +1,20 @@
-FLAGS = -Wall -fconcepts -o main
-CC = g++
-DIR = src/compiler/util/collections
+FLAGS = -stdc++20
+COMPILER = g++
+
+clangTest:
+	clang++  test.cpp -o main
 
 test:
-	$(CC) -o deps $(DIR)/collections.hpp
-				  $(DIR)/collections.cpp
-				  $(DIR)/special/specialptr.hpp
-				  $(DIR)/special/smartarray.hpp
-				  $(DIR)/special/smartarray.cpp
-	$(CC) -o main main.cpp deps.o
+	g++ $(FLAGS) main.cpp -o main
+
+test2:
+	$(COMPILER) main.cpp -I 
+	src/compiler/util/collections/collections.hpp
+	src/compiler/util/collections/collections.cpp
+	src/compiler/util/collections/special/specialptr.hpp
+	src/compiler/util/collections/special/smartarray.hpp
+	src/compiler/util/collections/special/smartarray.cpp
+	-o main
+
+run:
 	./main

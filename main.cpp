@@ -1,10 +1,23 @@
 #include <iostream>
-#include "src/compilerbase.hpp"
-#include "src/compiler/util/errors.hpp"
+#include "src/compiler/util/collections/collections.hpp"
 
-int main(int argc, char** argv){
-    beta::preprocess(util::string(argv[1]));
-    beta::err::Logger::printTrace();
+int main(void ){ 
+  util::string s = "Hello World";
+
+  std::cout << s.asCstr() << '\n';
+  
+  util::intlist il;
+  for(int i = 0; i < 6; i++){
+    il.append(i);
+  }
+
+  il.forEach([](int i){
+    std::cout << i << '\n';
+  });
+
+  
+  return 0;
+  
+  
 }
-
 

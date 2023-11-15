@@ -8,8 +8,11 @@
 #include "util/sfine/structchecker.hpp"
 #include "globals.hpp"
 #include <fstream>
+//TODO: Make own implementation
+#include <tuple>
 
-namespace beta::preproc {
+namespace beta{
+namespace preproc {
 
     enum Type{
         AT_ALIAS,
@@ -18,7 +21,9 @@ namespace beta::preproc {
         AT_END,
         AT_INCLUDE,
         AT_EXTERNAL,
-        AT_USE
+        AT_DEFINE,
+        AT_USE,
+        AT_DEFUN
     };
 
     enum Operators{
@@ -27,6 +32,7 @@ namespace beta::preproc {
         LESS_THAN,
         GREATER_THAN_OR_EQUAL,
         LESS_THAN_OR_EQUAL,
+        NOT_EQUAL
     };
 
 
@@ -54,15 +60,54 @@ namespace beta::preproc {
         typedef char start_t;
     } sdis_t;
 
+    util::string possibleOp[6] = {
+      "==",
+      ">"
+      "<"
+      ">=",
+      "<="
+      "!="
+    };
+  
+    Operators parseOp(util::string op){
+        int i;
+        for(i = 0; i < 6; i++) if(util::strcmp(possibleOp[i].asCstr(), op.asCstr())) break;
+        switch (i){
+          case 0:
+            return Operators::EQUALS;
+          case 1:
+            return Operators::GREATER_THAN;
+          case 3:
+            return Operators::GREATER_THAN_OR_EQUAL;
+          case 4:
+            return Operators::LESS_THAN_OR_EQUAL;
+          case 2:
+            return Operators::LESS_THAN;
+          case 5:
+            return Operators::NOT_EQUAL;
+          default:
+            break;
+        }
+    }
+  
     typedef struct EvalDiscriptor: public PreprocToken{
         char openPar;
-        util::string operandOne;
-        util::string operandTwo;
+        std::tuple<util::string, globals::Type> operandOne;
+        std::tuple<util::string, globals::Type> operandTwo;
+        util::string oper;
         Operators op;
         char endPar;
         char colon;
         typedef int eval_t;
+        bool evaluate();
     } evdis_t;
+
+    typedef struct DefDiscriptor: public PreprocToken{
+      typedef long long def_t;
+      util::string name;
+      util::string value;
+      globals::Type t;
+    } defdis_t;
 
     EvalDiscriptor parseExpession(pproc_t existing, util::string expression);
 
@@ -82,6 +127,15 @@ namespace beta::preproc {
 
     util::RelationalMap<globals::objdis_t, long> parseExternal(util::string external);
 
+    typedef struct PreDefunDescriptor: public globals::FunctionDescriptor, PreprocToken{
+      util::RelationalMap<util::string, globals::Type> args;
+      util::string endDir;
+      char colon;
+      util::RelationalMap<globals::bdis_t, long> children;
+    } atdef_t;
+
+    util::RelationalMap<util::string, globals::Type> parseTemplate(util::string args);
+  
     class Preprocessor{
         util::stringlist lines;
         util::LinkedList<util::stringlist> wrds;
@@ -124,6 +178,7 @@ namespace beta::preproc {
         }
 
         util::PossibleArch parseArch(util::string str){
+            util::PossibleArch a;
             int i = 0;
             for(i = 0; i < 6; i++){
                 if(util::strcmp(possible[i].asCstr(), str.asCstr())){
@@ -132,24 +187,26 @@ namespace beta::preproc {
             }
             switch(i){
                 case 0:
-                    return util::PossibleArch::ARM;
+                    a = util::PossibleArch::ARM;
                 case 1:
-                    return util::PossibleArch::AVR;
+                    a = util::PossibleArch::AVR;
                 case 2:
-                    return util::PossibleArch::X86_64;
+                    a =  util::PossibleArch::X86_64;
                 case 3:
-                    return util::PossibleArch::X86;
+                    a =  util::PossibleArch::X86;
                 case 4:
-                    return util::PossibleArch::JVM;
+                    a= util::PossibleArch::JVM;
                 case 5:
-                    return util::PossibleArch::MIPS;
+                    a= util::PossibleArch::MIPS;
                 case 6:
-                    return util::PossibleArch::RISC;
+                    a= util::PossibleArch::RISC;
                 default:
                     break;
             }
-            return util::PossibleArch::ERROR;
+            a =  util::PossibleArch::ERROR;
+            return a;
         }
+  
 
         public:
         Preprocessor(util::string fileName);
@@ -157,13 +214,12 @@ namespace beta::preproc {
         void checkForMarker(char marker);
         void parseToTokens();
         void evaluate();
+        void replace();
         util::LinkedList<pproc_t> expose();
         globals::globconfig_t returnGlobal();
         ~Preprocessor();
-
     };
-
-
+}
 } // namespace beta
 
 #endif

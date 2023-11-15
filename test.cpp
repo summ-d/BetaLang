@@ -1,14 +1,5 @@
-#ifndef typegen_hpp
-#define typegen_hpp
+#include <iostream>
 
-namespace util{
-
-    enum ReservedKeywords{
-        
-        
-    };
-
+int main() {
+  std::cout << "Hello World!\n";
 }
-
-
-#endif
