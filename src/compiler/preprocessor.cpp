@@ -47,8 +47,9 @@ namespace preproc{
         while(*temp.getline(file)){
             lines.append(temp);
         }
-        
+
         for(int i = 0; i < lines.getSize(); i++){
+            if(lines[i][0] == '/' && lines[i][1] == '/') continue;
             this->wrds.append(util::parse(lines[i]));
         }
     }
@@ -129,9 +130,9 @@ namespace preproc{
             switch(this->parse(occurances[i].dataOne)){
                 case 0: {
                     ppt.fullToken = occurances[i].dataOne;
-                    ppt.marker = '@';
+                    ppt.marker = occurances[i].dataOne[0];
                     ppt.t = Type::AT_USE;
-                    ppt.semi = ';';
+                    ppt.semi = occurances[i].dataOne[occurances[i].dataOne.findFirst(';').unwrap()];
                     udis_t ud = *(udis_t*)&ppt;
                     ud.arch = this->parseArch(expressions[i].dataOne);
                     tokens.append(ud, occurances[i].dataTwo);
@@ -139,9 +140,9 @@ namespace preproc{
                 }
                 case 1:{
                     ppt.fullToken = occurances[i].dataOne;
-                    ppt.marker = '@';
+                    ppt.marker = occurances[i].dataOne[0];
                     ppt.t = Type::AT_ALIAS;
-                    ppt.semi = ';';
+                    ppt.semi = occurances[i].dataOne[occurances[i].dataOne.findFirst(';').unwrap()];
                     adis_t ad = *(adis_t*)&ppt;
                     ad.type = util::parse(expressions[i].dataOne)[0];
                     ad.alias = util::parse(expressions[i].dataOne)[1];
@@ -151,7 +152,7 @@ namespace preproc{
                 case 2: {
                     ppt.fullToken = occurances[i].dataOne;
                     gc.startPoint = expressions[i].dataOne;
-                    ppt.marker = '@';
+                    ppt.marker = occurances[i].dataOne[0];
                     ppt.t = Type::AT_START;
                     ppt.semi = ';';
                     sdis_t sd = *(sdis_t*)&ppt;
@@ -219,7 +220,7 @@ namespace preproc{
                   ppt.fullToken = occurances[i].dataOne;
                   ppt.marker = occurances[i].dataOne[0];
                   ppt.t = Type::AT_DEFUN;
-                  ppt.semi = expressions[i].dataOne[expressions[i].dataOne.findFirst(';').unwrap()];
+                  ppt.semi = expressions[i].dataOne[expressions[i].dataOne.findFirst("@end;").unwrap() + 3];
                   // Dereferecing a cast from a refernce of the paent struct to a pointer of the child struct
                   atdef_t atdef = *(atdef_t*)&ppt;
                   atdef.args = util::RelationalMap<util::string, globals::Type> (parseTemplate(util::parse(expressions[i].dataOne, '\n')[0]));
@@ -232,10 +233,15 @@ namespace preproc{
                   tokens.append(atdef, occurances[i].dataTwo);
                   break;
                 }
-                default: 
+                default:
                     break;
             }
-        }  
+        }
+        this->checkFlags();  
+    }
+
+    void Preprocessor::checkFlags(){
+        
     }
 
     

@@ -305,6 +305,13 @@ namespace util{
   }
   */
 
+  DEFAULT_TEMPLATE_STRING
+  bool String<_String, Alloc>::startsWith(typename String<_String, Alloc>::ptr_type str){
+    int oSize = this->getNonTermSize(str);
+    String<_String, Alloc> temp = this->substr(0, oSize);
+    return util::strcmp(temp.asCStr(), str);
+  }
+
   template<typename _Link>
   Node<_Link>::Node(){
     prev = nullptr;
@@ -507,14 +514,19 @@ namespace util{
     return temp;
   }
   
-  LinkedList<util::string> parse(util::string str, char delim){
+  LinkedList<util::string> parse(util::string str, char delim, bool commentCheck){
       util::string sub = str.substr(0, delim);
       util::stringlist ret;
       ret.append(sub);
       for(int i = sub.getSize(); i < str.getSize(); i+= sub.getSize()){
         sub = str.substr(i, delim);
+        if(sub.startsWith("/*")){
+          //TODO: FIND WAY FOR COMMENTS
+        }
         ret.append(sub);
       }
+
+
       return ret;
   }  
   
@@ -691,7 +703,7 @@ namespace util{
   }
 
   DEFAULT_TEMPLATE_MAP
-  void RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::operator=(RelationalMap<ArOne, ArTwo>& rm){
+  void RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::operator=(RelationalMap<ArOne, ArTwo> rm){
     memcpy(this->allocatorOne, rm.rawOne(), this->oneUnder, rm.size());
     memcpy(this->allocatorOne, rm.rawTwo(), this->twoUnder, rm.size());
     this->pSize = rm.size();

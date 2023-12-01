@@ -126,17 +126,11 @@ public:
   Opt unwrap();
 
   friend constexpr bool operator==(Option<Opt> &o1, Option<Opt> &o2) {
-    if (o1.enabled != false || o2.enabled != false) {
-      return o1.Options::Some == o2.Options::Some;
-    }
-    return false;
+    return o1.unwrap() == o2.unwrap();
   }
 
   friend constexpr bool operator!=(Option<Opt> &o1, Option<Opt> &o2) {
-    if (o1.enabled != false || o2.enabled != false) {
-      return o1.Options::Some != o2.Options::Some;
-    }
-    return true;
+    return o1.unwrap() != o2.unwrap();
   }
 };
 } // namespace option
@@ -230,6 +224,8 @@ public:
   //std::istringstream makeStream();
 
   int lastPos();
+
+  bool startsWith(ptr_type str);
 
 };
 
@@ -328,8 +324,7 @@ typedef LinkedList<int> intlist;
 typedef LinkedList<util::string> stringlist;
 typedef LinkedList<float> floatlist;
 
-LinkedList<util::string> parse(util::string str, char delim = ' ');
-
+LinkedList<util::string> parse(util::string str, char delim = ' ', bool commentCheck);
 
 template<typename ArOne, typename ArTwo, typename AllocArOne = Allocator<ArOne>, typename AllocArTwo = Allocator<ArTwo>>
 class RelationalMap{

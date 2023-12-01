@@ -213,6 +213,7 @@ namespace preproc {
         void parseLines();
         void checkForMarker(char marker);
         void parseToTokens();
+        void checkFlags();
         void evaluate();
         void replace();
         util::LinkedList<pproc_t> expose();
