@@ -306,8 +306,8 @@ namespace util{
   */
 
   DEFAULT_TEMPLATE_STRING
-  bool String<_String, Alloc>::startsWith(typename String<_String, Alloc>::ptr_type str){
-    int oSize = this->getNonTermSize(str);
+  bool String<_String, Alloc>::startsWith(typename String<_String, Alloc>::kPtr_type str){
+    int oSize = this->getNonTermSize(const_cast<ptr_type>(str));
     String<_String, Alloc> temp = this->substr(0, oSize);
     return util::strcmp(temp.asCStr(), str);
   }
@@ -514,7 +514,7 @@ namespace util{
     return temp;
   }
   
-  LinkedList<util::string> parse(util::string str, char delim, bool commentCheck){
+  LinkedList<util::string> parse(util::string str, bool commentCheck, char delim){
       util::string sub = str.substr(0, delim);
       util::stringlist ret;
       ret.append(sub);
@@ -711,16 +711,17 @@ namespace util{
 
 
   DEFAULT_TEMPLATE_MAP
-  typename RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::Data& RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::operator()(int& idOne, int &idTwo){
+  typename RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::Data RelationalMap<ArOne, ArTwo, AllocArOne, AllocArTwo>::operator()(int idOne, int idTwo){
     Data d;
     switch(idTwo){
       case 0:
-        d.dataOne = this[idOne].dataOne;
+        d = this[idOne].dataOne;
         break;
       case 1:
-        d.dataTwo = this[idOne].dataTwo;
+        d = this[idOne].dataTwo;
         break;
       default:
+        d = this[idOne].dataTwo;
         break;
     }
     return d;

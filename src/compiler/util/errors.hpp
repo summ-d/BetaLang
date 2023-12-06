@@ -26,9 +26,10 @@
             }
 
             static void printTrace(){
-                errors.forEach([](BaseError* &e){
-                    std::cout << e;
+                std::function<void(BaseError*)> func([](BaseError* be){
+                    be->print();
                 });
+                errors.forEach(func);                
             }
 
         };

@@ -3,11 +3,11 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${default}"
             ],
             "defines": [],
-            "cStandard": "c23",
-            "cppStandard": "gnu++23",
+            "cStandard": "c17",
+            "cppStandard": "gnu++20",
             "intelliSenseMode": "linux-gcc-x64"
         }
     ],

@@ -4,14 +4,11 @@ namespace beta{
 namespace preproc{
 
     EvalDiscriptor parseExpession(pproc_t existing, util::string expression){
-      
+     //TODO 
       EvalDiscriptor edis; 
     }
 
-    bool EvalDiscriptor::evaluate(){
-      this->op = parseOp(this->oper);
-      
-    }
+
 
     util::RelationalMap<globals::objdis_t, long> parseExternal(util::string external){
         
@@ -27,8 +24,6 @@ namespace preproc{
       }
       return map;
     }
-
-  
 
     Preprocessor::Preprocessor(util::string fileName){
         file.open(fileName.asStdStr());
@@ -55,25 +50,24 @@ namespace preproc{
     }
 
     void Preprocessor::checkForMarker(char marker){
-        long length = 0;
         for(int i = 0; i < wrds.getSize(); i++){
             for(int j = 0; j < wrds[i].getSize(); i++){
-                length += wrds[i].getAt(j).getSize();
+                this->length += wrds[i].getAt(j).getSize();
                 if(wrds[i].getAt(j)[0] == marker){
-                    occurances.append(wrds[i].getAt(j), length);
+                    occurances.append(wrds[i].getAt(j), this->length);
                     switch(this->parse(wrds[i].getAt(j))){
                         case 0: case 2: case 5:
                             if(wrds[i].isLast(wrds[i].nodeAt(j).get())){
-                                expressions.append(wrds[i + 1].getAt(0), wrds[i + 1].getAt(0).getSize() + length);
+                                expressions.append(wrds[i + 1].getAt(0), wrds[i + 1].getAt(0).getSize() + this->length);
                                 if(wrds[i + 1].getAt(0)[wrds[i + 1].getAt(0).getSize() - 1] != ';'){
                                     globals::unexerr_t error;
-                                    error.filePos = length + (wrds[i + 1].getAt(0).getSize() - 1);
+                                    error.filePos = this->length + (wrds[i + 1].getAt(0).getSize() - 1);
                                     error.line = __LINE__;
                                     error.message = "Expected Semicolon";
                                     err::Logger::log(&error);
                                 }
                             } else{
-                                expressions.append(wrds[i].getAt(j + 1), length);
+                                expressions.append(wrds[i].getAt(j + 1), this->length);
                             }
                             break;
                         case 1: case 7:
@@ -81,10 +75,10 @@ namespace preproc{
                                 util::string temp = wrds[i + 1].getAt(0);
                                 if(wrds[i + 1].isLast(wrds[i + 1].nodeAt(0).get())){
                                     temp.concat(wrds[i + 2].getAt(0));
-                                    expressions.append(temp, length);
+                                    expressions.append(temp, this->length);
                                     if(temp[temp.getSize() - 1] != ';'){
                                         globals::unexerr_t error;
-                                        error.filePos = length + (temp.getSize() - 1);
+                                        error.filePos = this->length + (temp.getSize() - 1);
                                         error.line = __LINE__;
                                         error.message = "Expected Semicolon";
                                         err::Logger::log(&error);
@@ -93,7 +87,7 @@ namespace preproc{
                             } else{
                                 util::string temp = wrds[i][j + 1];
                                 temp.concat(wrds[i][j + 2]);
-                                expressions.append(temp, length + temp.getSize());
+                                expressions.append(temp, this->length + temp.getSize());
                             }
                             break;
                         case 3: case 6: {
@@ -102,7 +96,7 @@ namespace preproc{
                             util::string temp;
                             while(util::strcmp(wrds[i + countH][j + countV].asCstr(), "@end") != true && !wrds[i + countH].isLast(wrds[i].nodeAt(countH + i).get())){
                                 temp.concat(wrds[i + countH][j + countV]);
-                                expressions.append(temp, length + temp.getSize());
+                                expressions.append(temp, this->length + temp.getSize());
                                 if(wrds[i].isLast(wrds[i + countH].nodeAt(j + countV).get())){
                                     countH++;
                                 }
@@ -135,7 +129,7 @@ namespace preproc{
                     ppt.semi = occurances[i].dataOne[occurances[i].dataOne.findFirst(';').unwrap()];
                     udis_t ud = *(udis_t*)&ppt;
                     ud.arch = this->parseArch(expressions[i].dataOne);
-                    tokens.append(ud, occurances[i].dataTwo);
+                    tokens.append(&ud, occurances[i].dataTwo);
                     break;
                 }
                 case 1:{
@@ -146,10 +140,11 @@ namespace preproc{
                     adis_t ad = *(adis_t*)&ppt;
                     ad.type = util::parse(expressions[i].dataOne)[0];
                     ad.alias = util::parse(expressions[i].dataOne)[1];
-                    tokens.append(ad, occurances[i].dataTwo);
+                    tokens.append(&ad, occurances[i].dataTwo);
                     break;
                 }
                 case 2: {
+                    //TODO: Also Do checks on NO_START
                     ppt.fullToken = occurances[i].dataOne;
                     gc.startPoint = expressions[i].dataOne;
                     ppt.marker = occurances[i].dataOne[0];
@@ -157,7 +152,7 @@ namespace preproc{
                     ppt.semi = ';';
                     sdis_t sd = *(sdis_t*)&ppt;
                     sd.startPoint = expressions[i].dataOne;
-                    tokens.append(sd, occurances[i].dataTwo);
+                    tokens.append(&sd, occurances[i].dataTwo);
                     if(startCount > 0){
                         // Throw error
                     }
@@ -170,7 +165,7 @@ namespace preproc{
                     ppt.t = Type::AT_EVAL;
                     ppt.semi = ';';
                     evdis_t edis = parseExpession(ppt, expressions[i].dataOne);
-                    tokens.append(edis, occurances[i].dataTwo);
+                    tokens.append(&edis, occurances[i].dataTwo);
                     break;
                 }
                 case 4: {
@@ -178,7 +173,7 @@ namespace preproc{
                     ppt.marker = '@';
                     ppt.t = Type::AT_END;
                     ppt.semi = ';';
-                    tokens.append(ppt, occurances[i].dataTwo);
+                    tokens.append(&ppt, occurances[i].dataTwo);
                     break;
                   }
                 case 5: {
@@ -188,7 +183,7 @@ namespace preproc{
                     ppt.semi = ';';
                     indis_t id = *(indis_t*)&ppt;
                     id.includeFn = occurances[i].dataOne;
-                    tokens.append(id, occurances[i].dataTwo);
+                    tokens.append(&id, occurances[i].dataTwo);
                     break;
                   }    
                 case 6: {
@@ -202,7 +197,7 @@ namespace preproc{
                     exdis.endDirective = temp.getBack();
                     exdis.startPosition = occurances[i].dataTwo;
                     exdis.endPosition = expressions[i].dataTwo;
-                    tokens.append(exdis, occurances[i].dataTwo);
+                    tokens.append(&exdis, occurances[i].dataTwo);
                     break;
                   }  
                 case 7: {
@@ -213,7 +208,7 @@ namespace preproc{
                     defdis_t defdis = *(defdis_t*)&ppt;
                     defdis.name = util::parse(expressions[i].dataOne)[0];
                     defdis.value = util::parse(expressions[i].dataOne)[1];
-                    tokens.append(defdis, occurances[i].dataTwo);
+                    tokens.append(&defdis, occurances[i].dataTwo);
                     break;
                   }
                 case 8:{
@@ -230,7 +225,7 @@ namespace preproc{
                   atdef.type = globals::Type::DEFUN;
                   int ref = expressions[i].dataOne.findAll((char*)"=>")[0];
                   atdef.retType = globals::getType(expressions[i].dataOne.substr(ref + 2));
-                  tokens.append(atdef, occurances[i].dataTwo);
+                  tokens.append(&atdef, occurances[i].dataTwo);
                   break;
                 }
                 default:
@@ -241,10 +236,55 @@ namespace preproc{
     }
 
     void Preprocessor::checkFlags(){
-        
+       for(int i = 0; i < this->lines.getSize(); i++){
+            if(lines[i].startsWith("[!@")){
+                flag_t flag;
+                flag.total = lines[i];
+                flag.starting = lines[i].substr(0, 3);
+                flag.closingBracket = lines[i][lines[i].lastPos() - 1];
+                flag.semi = lines[i][lines[i].lastPos()];
+                this->flags.append(flag, this->length + lines[i].getSize());
+            }
+       }
     }
 
-    
-  
+    void Preprocessor::evaluate(){
+        for(int i = 0; i < this->tokens.size(); i++){
+           pproc_t* currentToken = this->tokens[i].dataOne;
+           long pos = this->tokens[i].dataTwo; 
+           // For Eval Blocks
+           if(evdis_t* eval = static_cast<evdis_t*>(currentToken)){
+                double numberOne = this->getNumber(std::get<util::string>(eval->operandOne));
+                double numberTwo = this->getNumber(std::get<util::string>(eval->operandTwo));
+                switch(eval->op){
+                    case Operators::EQUALS:
+                        eval->value = (numberOne == numberTwo);
+                        break;
+                    case Operators::GREATER_THAN:
+                        eval->value = (numberOne > numberTwo);
+                        break;
+                    case Operators::GREATER_THAN_OR_EQUAL:
+                        eval->value = (numberOne >= numberTwo);
+                        break;
+                    case Operators::LESS_THAN_OR_EQUAL:
+                        eval->value = (numberOne <= numberTwo);
+                        break;
+                    case Operators::LESS_THAN:
+                        eval->value = (numberOne < numberTwo);
+                    case Operators::NOT_EQUAL:
+                        eval->value = (numberOne != numberTwo);
+                    default:
+                        break;
+                }
+                // TODO: Change these to pointers
+                tokens.after(eval, pos, i); 
+           }
+           // For External Blocks
+           // Forgive me
+           if(extdis_t* exdis = static_cast<extdis_t*>(currentToken)){
+               
+           } 
+        }
+    }
   }
 }

@@ -14,6 +14,7 @@ namespace util {
 typedef unsigned long size_t;
 typedef unsigned char u8;
 
+
   //struct Helper{ static void NOT_IMPLEMENTED(); };
   //#define NOT_IMPLEMENTED() Helper::NOT_IMPLEMENTED();
   
@@ -225,7 +226,12 @@ public:
 
   int lastPos();
 
-  bool startsWith(ptr_type str);
+  bool isNumber();
+
+  double getNumber();
+
+
+  bool startsWith(kPtr_type str);
 
 };
 
@@ -324,7 +330,7 @@ typedef LinkedList<int> intlist;
 typedef LinkedList<util::string> stringlist;
 typedef LinkedList<float> floatlist;
 
-LinkedList<util::string> parse(util::string str, char delim = ' ', bool commentCheck);
+LinkedList<util::string> parse(util::string str, bool commentCheck = false, char delim = ' ');
 
 template<typename ArOne, typename ArTwo, typename AllocArOne = Allocator<ArOne>, typename AllocArTwo = Allocator<ArTwo>>
 class RelationalMap{
@@ -378,7 +384,7 @@ class RelationalMap{
 
   // TODO: Convert this to a valid thing (Add argument)
   void operator+=(RelationalMap<ArOne, ArTwo>& rm);
-  Data& operator()(int& idOne, int& idTwo);
+  Data operator()(int idOne, int idTwo);
 
   RelationalData front();
   RelationalData back();

@@ -16,6 +16,7 @@ namespace util{
         JVM,
         MIPS,
         RISC,
+        MSIL,
         ERROR = -1
     };
 

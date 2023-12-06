@@ -56,7 +56,7 @@
             static const bool value = sizeof(test<IsStart>(nullptr)) == sizeof(yes);
         };
 
-        template<typename IsEval>
+        template<class IsEval>
         class is_eval: public DummyInheriter{
 
             typedef char yes[1];

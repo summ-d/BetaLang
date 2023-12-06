@@ -1,4 +1,3 @@
-#pragma once
 #ifndef SMARTARRAY_HPP
 #define SMARTARRAY_HPP
 namespace util{

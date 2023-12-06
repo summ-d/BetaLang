@@ -1,0 +1,37 @@
+@use CHILD_ARCH;
+@start NO_START;
+
+
+import std::file::FileStream;
+import std::file::ReadFile;
+import std::file::WriteFile;
+import std::File;
+import std::Output;
+import std::collections::List;
+
+[!@NO_INCLUDE];
+
+pack FileReader{
+
+    obj FileReader{
+        let priv file: ReadFile;
+        
+        pub con(name: String, mode: FileStream = null) => Void;
+        pub defun readFile() => String;
+        pub defun readLines() => List<String>;
+
+
+        pub decon() => Void;
+    }
+
+    FileReader::con(name: String, mode: FileStream) => Void{
+        self.file => new File(name, mode);
+    }
+
+    FileReader::decon() => Void{
+        self.file.close();
+    }
+
+
+}
+

@@ -10,6 +10,7 @@
 #include <fstream>
 //TODO: Make own implementation
 #include <tuple>
+#include<iostream>
 
 namespace beta{
 namespace preproc {
@@ -99,7 +100,7 @@ namespace preproc {
         char endPar;
         char colon;
         typedef int eval_t;
-        bool evaluate();
+        bool value;
     } evdis_t;
 
     typedef struct DefDiscriptor: public PreprocToken{
@@ -121,6 +122,7 @@ namespace preproc {
         util::string endDirective;
         long startPosition;
         long endPosition;
+        util::RelationalMap<util::string, long> parsedString;
         util::RelationalMap<globals::objdis_t, long> children;
         typedef double extern_t;
     } extdis_t;
@@ -135,16 +137,27 @@ namespace preproc {
     } atdef_t;
 
     util::RelationalMap<util::string, globals::Type> parseTemplate(util::string args);
-  
+
+    typedef struct FlagDescriptor{
+        util::string total;
+        util::string starting;
+        util::string flag;
+        char closingBracket;
+        char semi;
+    } flag_t;
+
     class Preprocessor{
+        long length;
         util::stringlist lines;
+        util::RelationalMap<flag_t, long> flags;
         util::LinkedList<util::stringlist> wrds;
         util::RelationalMap<util::string, long> occurances;
         util::RelationalMap<util::string, long> expressions;
-        util::RelationalMap<pproc_t, long> tokens;
+        util::RelationalMap<pproc_t*, long> tokens;
         util::RelationalMap<util::DummyInheriter, long> tokenCheckers;
         std::ifstream file;
         globals::globconfig_t gc;
+        globals::finfo_t info;
 
         util::string possible[9] = {
             "@use", // 0
@@ -158,14 +171,15 @@ namespace preproc {
             "@defun" // 8
         };
 
-        util::string possibleArch[7] = {
+        util::string possibleArch[8] = {
             "ARM",
             "AVR",
             "x86_64",
             "x86",
             "JVM",
             "MIPS",
-            "RISC-V"
+            "RISC-V",
+            "MSIL"
         };
 
         int parse(util::string str){
@@ -177,10 +191,29 @@ namespace preproc {
             return -1;   
         }
 
+        double loopAndCompare(util::string keyword){
+            for(int i = 0; i < tokens.size(); i++){
+                if(defdis_t* temp = static_cast<defdis_t*>(tokens[i].dataOne)){
+                    if(temp->value.isNumber() && util::strcmp(keyword.asCStr(), temp->name.asCStr())){
+                        return temp->value.getNumber();
+                    }
+                }
+            }
+            // TODO: Some better exit code failure
+            return 0;
+        }
+
+        double getNumber(util::string number){
+            if(!number.isNumber()){
+                return loopAndCompare(number);
+            }
+            return number.getNumber();
+        }
+
         util::PossibleArch parseArch(util::string str){
             util::PossibleArch a;
             int i = 0;
-            for(i = 0; i < 6; i++){
+            for(i = 0; i < 7; i++){
                 if(util::strcmp(possible[i].asCstr(), str.asCstr())){
                     break;
                 }
@@ -199,7 +232,9 @@ namespace preproc {
                 case 5:
                     a= util::PossibleArch::MIPS;
                 case 6:
-                    a= util::PossibleArch::RISC;
+                    a = util::PossibleArch::RISC;
+                case 7:
+                    a = util::PossibleArch::MSIL;
                 default:
                     break;
             }

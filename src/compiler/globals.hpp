@@ -9,12 +9,26 @@
 namespace beta{
   namespace globals {
 
+  struct BasicDiscriptor;
+  struct FunctionDescriptor;
+
 typedef struct GlobalConfig {
   util::string fileName;
   util::string startPoint;
   util::PossibleArch arch;
 } globconfig_t;
 
+typedef struct FileInfo{
+    util::string fileName;
+    bool noInc;
+    bool forceInc;
+    bool isPrelude;
+} finfo_t;
+
+typedef struct CustomFlag{
+  util::string name;
+  //TODO
+} cfg_t;
 typedef struct IOError : public virtual err::BaseError {
   util::string fileName;
   void print() const override {
@@ -41,9 +55,7 @@ private:
   const char *raw = message.asCstr();
 } unexerr_t;
 
-typedef struct ObjTypeDiscriptor {
 
-} objdis_t;
 
 enum Type {
   INTEGER,     // 1
@@ -86,7 +98,16 @@ enum Qualifiers {
   PROP
 };
 
-struct FunctionDescriptor;
+typedef struct ObjTypeDiscriptor {
+  util::string name;
+  Type t;
+  util::RelationalMap<FunctionDescriptor, long> functions;
+  util::RelationalMap<BasicDescriptor, long> members;
+  util::RelationalMap<ObjTypeDiscriptor, long> internalObjects;
+  FunctionDescriptor* constructor;
+  FunctionDescriptor* deconstructor;
+  util::RelationalMap<Qualifiers, int> qualifiers;
+} objdis_t;
 
 typedef struct BasicDescriptor {
   util::RelationalMap<Qualifiers, int> qualifiers;
@@ -116,7 +137,7 @@ typedef struct FunctionDescriptor : BasicDescriptor {
   util::RelationalMap<util::string, Type> generics;
 } fdis_t;
 
-typedef struct UnsupportedQualifierError : public virtual err::BaseErr {
+typedef struct UnsupportedQualifierError : public virtual err::BaseError{
   util::string qualifier;
   int pos;
   void print() const override {}
