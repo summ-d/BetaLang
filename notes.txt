@@ -1,7 +1,0 @@
-1. Arm
-2. Avr
-3. Mips
-4. X86
-5. x86_64
-6. MSIL
-7. JVM
