@@ -9,17 +9,23 @@
 
 namespace beta::util {
 
+    typedef unsigned short size_t;
+
+    inline size_t strlen(const char* s1);
+
     inline bool strcmp(const char* s1, const char* s2);
 
     inline void copystr(const char* src, char *dest, int size);
 
     template<typename St, typename Al = alloc::sAllocator<St>>
-    class String {
+    class [[maybe_unused]] String {
         using str = St *;
 
         str underlying;
 
         Al allocator;
+
+        size_t len{};
 
     public:
         String() = default;
@@ -53,7 +59,11 @@ namespace beta::util {
 
         bool has(St& ele) const;
         bool has(const str& ele) const;
+
+        size_t length() const;
     };
+
+    [[maybe_unused]] typedef String<char> string;
 }
 
 
