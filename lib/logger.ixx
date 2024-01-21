@@ -2,10 +2,11 @@
 // Created by jack on 1/20/24.
 //
 
+#include <iostream>
+
 export module util.logger;
 import util.linkedlist;
 import util.string;
-#include <iostream>
 
 export namespace beta::util {
     typedef struct BaseError: std::exception {
