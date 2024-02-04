@@ -29,8 +29,43 @@ export namespace beta::base::types {
         STRING,
         CHAR,
         ANY,
-        VOID
+        VOID,
+        UNKNOWN = -1
     };
+
+    const util::string allTypes[22] = {
+            "Integer",
+            "Int8",
+            "Int16",
+            "Int32",
+            "Int64",
+            "Uint8",
+            "Uint16",
+            "Uint32",
+            "Uint64",
+            "BigInt",
+            "Float",
+            "Float8",
+            "Float16",
+            "Float32",
+            "Float64",
+            "BigFloat",
+            "Boolean",
+            "String",
+            "Char",
+            "Any",
+            "Void",
+            "Object"
+    };
+
+    int getType(const util::string& str) {
+        int i = 0;
+        for(const util::string& ele: allTypes) {
+            if(str.has(ele)) return i;
+            i++;
+        }
+        return -1;
+    }
 
     enum NumberTypes {
         NINTEGER,
@@ -68,6 +103,10 @@ export namespace beta::base::types {
         POINTER,
         REFERENCE
     };
+
+    Qualifiers parseQualifier(const util::string& str) {
+
+    }
 
     typedef struct VariableRules {
         VariableRules(bool can_abstract, bool can_static, bool can_mut, bool can_register,
@@ -120,23 +159,37 @@ export namespace beta::base::types {
     const varrule_t in_composition = VariableRules(false, true, true, false,
                                                    true, true, false, true);
 
-    typedef struct PrimitiveType {
-        util::list<Qualifiers> qualifiers;
+    typedef struct Context {
+        bool in_global = false;
+        bool in_param = false;
+        bool in_object = false;
+        bool in_comp = false;
+        bool in_local = false;
+        bool in_alias = false;
+    } ctx_t;
+
+    typedef struct BaseTypeDescriptor {
+        util::string name;
+        util::string type;
+        util::string full;
+    } btdis_t;
+
+    typedef struct PrimitiveType: BaseTypeDescriptor {
+        util::List<Qualifiers> qualifiers;
         AllTypes type;
         bool is_local = false;
         bool is_param = false;
         bool is_reference = false;
         bool is_class = false;
         bool is_tuple;
+        bool is_alias;
         util::tps::u8 refcount = 0;
         util::tps::u8 ptrcount = 0;
         varrule_t rules;
-        util::string name;
+        ctx_t context;
     } prdis_t;
 
-    typedef struct AnyType {
-        util::string type;
-        util::string name;
+    typedef struct AnyType: BaseTypeDescriptor {
         bool is_local = false;
         bool is_param = false;
         bool is_reference = false;
@@ -145,10 +198,11 @@ export namespace beta::base::types {
         util::tps::u8 refcount = 0;
         util::tps::u8 ptrcount = 0;
         varrule_t rules;
+        ctx_t context;
     } any_t;
 
-    typedef struct TupleType {
-        util::list<AnyType> types;
+    typedef struct TupleType: BaseTypeDescriptor {
+        util::List<AnyType> types;
         int elements = 0;
     } tuple_t;
 
@@ -160,7 +214,9 @@ export namespace beta::base::types {
         x86_64,
         x86,
         MIPS,
-        RISCV
+        RISCV,
+        UNDEFINED,
+        CHILD_ARCH
     };
 
     enum Operators {
@@ -180,5 +236,4 @@ export namespace beta::base::types {
         LEFT,
         RIGHT
     };
-
 }

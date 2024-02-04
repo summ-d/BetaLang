@@ -5,12 +5,12 @@
 export module types.preprocessortypes;
 
 import types.globaltypes;
-import util.string;
-import util.linkedlist;
-import util.extras;
 import trans.basetranspiler;
+import util.string;
+import util.extras;
+import util.linkedlist;
 
-namespace beta::pp::types {
+export namespace beta::pp::types {
 
 
     enum PreprocessorKeys {
@@ -32,7 +32,7 @@ namespace beta::pp::types {
     } bppt_t;
 
     [[maybe_unused]] typedef struct AliasToken: BasePreprocessorToken {
-        base::types::prdis_t type;
+        base::types::btdis_t* type;
         util::string alias;
     } atok_t;
 
@@ -43,13 +43,14 @@ namespace beta::pp::types {
 
     [[maybe_unused]] typedef struct UseToken: BasePreprocessorToken {
         bool is_valid = true;
-        base::types::ValidArches arch;
+        base::types::ValidArches arch = base::types::UNDEFINED;
+        base::types::ctx_t context = base::types::Context();
     } usetok_t;
 
     [[maybe_unused]] typedef struct DefunToken: BasePreprocessorToken {
         util::string funcName;
         char leftp;
-        util::list<base::types::any_t> args;
+        util::List<base::types::any_t> args;
         char rightp;
         util::string end;
         base::types::any_t returnType;
@@ -74,7 +75,7 @@ namespace beta::pp::types {
         trans::BaseTranspiler* transpiler = nullptr;
         util::string extName;
         util::string extension;
-        util::list<util::string> imports;
+        util::List<util::string> imports;
     } externtok_t;
 
     [[maybe_unused]] typedef struct IncludeToken: BasePreprocessorToken {

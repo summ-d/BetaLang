@@ -2,9 +2,11 @@
 // Created by jack on 1/15/24.
 //
 
+#include <typeinfo>
+
 export module util.extras;
 
-#include <typeinfo>
+
 
 /* Well, I have to do documentation, as per JetBrains (Generous) Open-Source License
  * This will make me a better programmer... probably
@@ -38,7 +40,7 @@ export namespace beta::util{
      * @returnType size_t
     */
     template<typename T, size_t N>
-    constexpr size_t size(const T (&array)[N]) noexcept {
+    constexpr size_t size(T (&)[N]) noexcept {
         return N;
     }
 
@@ -249,4 +251,11 @@ export namespace beta::util{
             }
         }; // End class Any
     } // End namespace any
+
+    template<typename T>
+    struct ArrayWrap{
+        T* array;
+        tps::size_t length;
+    };
+
 } // End namespace beta::util

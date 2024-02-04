@@ -4,6 +4,8 @@
 
 export module util.smartptr;
 
+import util.extras;
+
 export namespace beta::util::sp{
 
     template<typename T>
@@ -12,85 +14,70 @@ export namespace beta::util::sp{
 
     public:
         Smartptr() = default;
-        explicit Smartptr(T* ptr = nullptr) {
-            this->underlying = new T;
+
+        explicit Smartptr(T* ptr) {
             this->underlying = ptr;
         }
 
+        explicit Smartptr(std::nullptr_t np){
+            this->underlying = np;
+        }
+
         Smartptr(const Smartptr<T>& other) {
-            this->underlying = new T;
             this->underlying = other.underlying;
         }
 
-        [[maybe_unused]] Smartptr(Smartptr<T>&& other) noexcept {
-            this->underlying = new T;
-            this->underlying = other.underlying;
+        Smartptr(Smartptr<T>&& other) noexcept{
+            tps::swap(this->underlying, other.underlying);
         }
 
-        T* raw() const {
-            return this->underlying;
-        }
 
-        Smartptr<T>& operator=(T*& other) {
-            this->underlying = new T;
+        Smartptr<T>& operator=(T* other) {
             this->underlying = other;
             return *this;
         }
 
         Smartptr<T>& operator=(const Smartptr<T>& other) {
             if(&other != this){
-                delete this->underlying;
-                this->underlying = new T;
                 this->underlying = other.underlying;
             }
             return *this;
         }
 
         Smartptr<T>& operator=(Smartptr<T>&& other) noexcept {
-            delete this->underlying;
-            this->underlying = new T;
-            this->underlying = other.underlying;
+            tps::swap(this->underlying, other.underlying);
+            other.underlying = nullptr;
             return *this;
         }
 
-        constexpr bool operator==(T*& other) const {
-            return other == this->underlying;
+        Smartptr<T>& operator=(std::nullptr_t np) {
+            this->underlying = np;
+            return *this;
         }
 
-        constexpr bool operator==(const Smartptr<T>& other) const {
-            return other.underlying == this->underlying;
-        }
-
-        constexpr bool operator==(Smartptr<T>&& other) const noexcept {
-            return other.underlying == this->underlying;
-        }
-
-        const T& operator[](int idx) const {
-            return this->underlying[idx];
-        }
-
-        T& operator[](int idx) {
-            return this->underlying[idx];
-        }
-
-        const T* operator->() const {
-            return this->underlying;
-        }
-
-        T* operator->() {
-            return this->underlying;
-        }
-
-        const T& operator*() const {
+        T& operator*(){
             return *this->underlying;
         }
 
-        T& operator*() {
+        const T& operator*() const{
             return *this->underlying;
         }
 
-        explicit operator T*() const {
+        T*& operator->(){
             return this->underlying;
+        }
+
+        const T*& operator->() const {
+            return this->underlying;
+        }
+
+
+        explicit operator T*(){
+            return this->underlying;
+        }
+
+        explicit operator std::nullptr_t() {
+            return nullptr;
         }
 
         ~Smartptr() { delete this->underlying; }

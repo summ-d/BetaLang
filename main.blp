@@ -1,0 +1,23 @@
+@start Start;
+@use JVM;
+
+
+import std::Output;
+import foo::*;
+
+@alias TupleType_a => (const Int8*, const Int16*, Int32)
+
+let out: Output => Output(Output.CONSOLE);
+
+defun test(one: Int8, two: Int16, three: Int32) => TupleType_a {
+
+}
+
+defun Start(args: String[]) => Int8 {
+    Global.out.println("Hello World!");
+    ret 0;
+}
+
+defun test() => Integer{
+    ret 5;
+}

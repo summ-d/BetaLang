@@ -6,7 +6,7 @@ export namespace beta::util::alloc{
     template<typename T>
     class [[maybe_unused]] sAllocator{
         public:
-        T* allocate(int num) {
+        T* allocate(int num) const{
             return new T[num];
         }
         T* allocate_size(int size) {
