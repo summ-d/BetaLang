@@ -1,0 +1,25 @@
+Output
+List<T, Al = Allocator<T>>
+String<S, Al = Allocator<S>>
+Array<T, N>
+Function<T(Args...)>
+InitList<T, I = 0>
+Allocator<T, N = 1>
+File
+Async<Function<T(Args...)>>
+Promise<T>
+Await<Promise<T>>
+
+Order of making:
+    1. Output
+    2. FreeList
+    2. Allocator<T, N>
+    3. String<S, Al>
+    4. InitList<T, I = 0>
+    4. List<T, Al>
+    5. Array<T, N>
+    6. File
+    7. Function<T(Args...)>
+    8. Promise<T>
+    9. Async<Function<T(Args...)>
+    10. Await<Promise<T>>
